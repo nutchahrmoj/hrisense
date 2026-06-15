@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd hrisense-app && npm run build",
+  "outputDirectory": "hrisense-app/.next",
+  "installCommand": "cd hrisense-app && npm install",
+  "framework": "nextjs"
+}
