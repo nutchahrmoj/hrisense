@@ -6,4 +6,5 @@ node_modules/
 next-env.d.ts
 .claude/
 secrets/
-hrisense-app/node_modules/
+hrisense-app/
+.gitignore.app
