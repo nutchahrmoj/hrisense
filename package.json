@@ -1,0 +1,5 @@
+{
+  "name": "hrisense",
+  "private": true,
+  "workspaces": ["hrisense-app"]
+}
