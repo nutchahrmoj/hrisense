@@ -1,10 +1,8 @@
-node_modules/
-.next/
+node_modules
+.next
 .env.local
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
 .claude/
 secrets/
-hrisense-app/
-.gitignore.app
