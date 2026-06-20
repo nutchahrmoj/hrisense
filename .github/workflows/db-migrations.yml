@@ -46,7 +46,7 @@ jobs:
       - name: Verify migrations
         run: |
           echo "Checking migration status..."
-          supabase db diff --schema public --use-migra || true
+          supabase db diff --schema public --use-migra
 
       - if: always()
         run: supabase stop
