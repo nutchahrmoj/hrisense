@@ -189,10 +189,10 @@ const eduLevels = ['bachelors', 'bachelors', 'bachelors', 'masters', 'masters', 
 const eduDegree: Record<string, string> = { bachelors: 'ศิลปศาสตรบัณฑิต', masters: 'วิทยาศาสตรมหาบัณฑิต', doctorate: 'ปรัชญาดุษฎีบัณฑิต' }
 
 function riskLevelFromScore(score: number): 'green' | 'amber' | 'red' | 'critical' {
-  if (score > 80) return 'critical'
-  if (score > 60) return 'red'
-  if (score > 40) return 'amber'
-  return 'green'
+  if (score > 80) return 'critical'   // 81-100 = วิกฤต
+  if (score > 70) return 'red'         // 71-80 = เสี่ยงสูง
+  if (score > 50) return 'amber'       // 51-70 = เฝ้าระวัง
+  return 'green'                        // ≤50 = ปกติ
 }
 
 // ---------------------------------------------------------------------------
@@ -248,6 +248,38 @@ const divHeadcount: Record<string, number> = {
 
 const todayMs = new Date().getTime()
 
+// Per-org risk profiles — controls the distribution of risk scores per division
+// so each org has a distinct risk character. Values are probability multipliers.
+// 'critical' orgs have much higher rates of transfer/talent/burnout risk;
+// 'low' orgs have very low rates; 'mixed' is the default moderate spread.
+type RiskProfile = 'critical' | 'high' | 'mixed' | 'low'
+const orgRiskProfile: Record<string, RiskProfile> = {
+  'org-3':  'mixed',     // กองกลาง
+  'org-4':  'high',      // กองบริหารทรัพยากรบุคคล — HR under pressure
+  'org-5':  'mixed',     // กองบริหารการคลัง
+  'org-6':  'low',       // กองการต่างประเทศ
+  'org-7':  'low',       // กองออกแบบและก่อสร้าง
+  'org-8':  'critical',  // ศูนย์เทคโนโลยี — IT talent shortage
+  'org-9':  'mixed',     // กองกฎหมาย
+  'org-10': 'high',      // กองยุทธศาสตร์ — policy pressure
+  'org-11': 'mixed',     // สถาบันพัฒนาบุคลากร
+  'org-12': 'low',       // กลุ่มตรวจสอบภายใน
+  'org-13': 'high',      // กลุ่มพัฒนาระบบบริหาร
+  'org-14': 'critical',  // สำนักผู้ตรวจราชการ
+  'org-15': 'mixed',     // กองพัฒนานวัตกรรม
+  'org-16': 'high',      // ศูนย์ปฏิบัติการต่อต้านทุจริต
+  'org-17': 'low',       // ศูนย์บริการร่วม
+  'org-18': 'mixed',     // สำนักงานกองทุนยุติธรรม
+  'org-19': 'critical',  // กองประสานราชการยุติธรรมจังหวัด
+}
+
+const profileParams: Record<RiskProfile, { transferP: number; transferRange: [number, number]; talentP: number; talentRange: [number, number]; burnoutP: number; retBoost: number }> = {
+  critical: { transferP: 0.45, transferRange: [55, 82], talentP: 0.50, talentRange: [58, 88], burnoutP: 0.40, retBoost: 8 },
+  high:     { transferP: 0.30, transferRange: [48, 72], talentP: 0.35, talentRange: [50, 78], burnoutP: 0.28, retBoost: 4 },
+  mixed:    { transferP: 0.20, transferRange: [48, 72], talentP: 0.25, talentRange: [50, 78], burnoutP: 0.18, retBoost: 0 },
+  low:      { transferP: 0.08, transferRange: [8, 30],  talentP: 0.10, talentRange: [10, 35], burnoutP: 0.06, retBoost: -5 },
+}
+
 function generatePersonnel() {
   const out: any[] = []
   let empIdx = 11
@@ -256,6 +288,7 @@ function generatePersonnel() {
     const cfg = divConfig[orgId]
     const org = mockOrganizations.find(o => o.id === orgId)!
     const count = divHeadcount[orgId]
+    const profile = profileParams[orgRiskProfile[orgId] || 'mixed']
     for (let i = 0; i < count; i++) {
       const id = `p-${empIdx}`
       const gender = rng() < 0.52 ? 'male' : 'female'
@@ -276,18 +309,18 @@ function generatePersonnel() {
       const edu = pick(eduLevels as unknown as string[])
 
       let retirementRisk: number
-      if (yearsRemaining <= 1) retirementRisk = rand(82, 96)
-      else if (yearsRemaining <= 3) retirementRisk = rand(60, 82)
-      else if (yearsRemaining <= 5) retirementRisk = rand(40, 62)
-      else if (yearsRemaining <= 10) retirementRisk = rand(18, 42)
-      else retirementRisk = rand(5, 24)
+      if (yearsRemaining <= 1) retirementRisk = rand(82 + profile.retBoost, 96 + profile.retBoost)
+      else if (yearsRemaining <= 3) retirementRisk = rand(60 + profile.retBoost, 82 + profile.retBoost)
+      else if (yearsRemaining <= 5) retirementRisk = rand(40 + profile.retBoost, 62 + profile.retBoost)
+      else if (yearsRemaining <= 10) retirementRisk = rand(18 + profile.retBoost, 42 + profile.retBoost)
+      else retirementRisk = rand(5 + profile.retBoost, 24 + profile.retBoost)
 
-      const transferRisk = rng() < 0.20 ? rand(48, 72) : rand(8, 34)
-      const talentLossRisk = rng() < 0.25 ? rand(50, 78) : rand(10, 38)
+      const transferRisk = rng() < profile.transferP ? rand(...profile.transferRange) : rand(8, 34)
+      const talentLossRisk = rng() < profile.talentP ? rand(...profile.talentRange) : rand(10, 38)
 
-      // Burnout inputs — behavioral/performance data YTD. ~18% are pushed into
-      // the high-burnout band via elevated OT + workload + low training.
-      const burnoutProne = rng() < 0.18
+      // Burnout inputs — behavioral/performance data YTD.
+      // Profile controls the probability of high-burnout band.
+      const burnoutProne = rng() < profile.burnoutP
       const burnoutInputs: BurnoutInputs = {
         late_days_ytd: burnoutProne ? randInt(6, 18) : randInt(0, 6),
         absent_days_ytd: burnoutProne ? randInt(4, 12) : randInt(0, 4),
@@ -442,9 +475,9 @@ export const mockOrgDashboard = mockOrganizations
     const criticalPositions = positions.filter(v => v.is_critical).length
     const avgRisk = personnel.length > 0 ? personnel.reduce((s, p) => s + (p.overall_risk_score || 0), 0) / personnel.length : 0
     let riskLevel = 'green'
-    if (avgRisk >= 75) riskLevel = 'critical'
-    else if (avgRisk >= 50) riskLevel = 'red'
-    else if (avgRisk >= 25) riskLevel = 'amber'
+    if (avgRisk > 80) riskLevel = 'critical'
+    else if (avgRisk > 70) riskLevel = 'red'
+    else if (avgRisk > 50) riskLevel = 'amber'
     return {
       organization_id: org.id, org_code: org.org_code, name_th: org.name_th,
       abbreviation_th: org.abbreviation_th, level: org.level, org_level: org.level,
@@ -538,9 +571,9 @@ export const mockOrgRiskDetails = mockOrganizations
     const avg = (key: 'overall_risk_score' | 'retirement_risk' | 'transfer_risk' | 'talent_loss_risk') => personnel.length > 0 ? round2(personnel.reduce((s, p) => s + ((p[key] as number) || 0), 0) / personnel.length) : 0
     const overall = avg('overall_risk_score')
     let riskLevel = 'green'
-    if (overall >= 75) riskLevel = 'critical'
-    else if (overall >= 50) riskLevel = 'red'
-    else if (overall >= 25) riskLevel = 'amber'
+    if (overall > 80) riskLevel = 'critical'
+    else if (overall > 70) riskLevel = 'red'
+    else if (overall > 50) riskLevel = 'amber'
     const totalQuota = positions.reduce((s, v) => s + v.quota, 0)
     const totalVacant = positions.reduce((s, v) => s + v.vacancy_count, 0)
     return {
