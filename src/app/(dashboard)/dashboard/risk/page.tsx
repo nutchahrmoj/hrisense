@@ -201,7 +201,7 @@ export default async function RiskPage() {
                   <Target className="w-6 h-6 text-blue-600" />
                 </div>
                 <p className="text-2xl font-bold text-blue-600">{talentLossRisk}</p>
-                <p className="text-xs text-muted-foreground mt-1">เสี่ยง Burnout</p>
+                <p className="text-xs text-muted-foreground mt-1">เสี่ยงสูญเสียทาเลนท์</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground text-center mt-4">

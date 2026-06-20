@@ -21,7 +21,8 @@ export const POSITION_CATEGORIES_TH = [
 export const RISK_FACTORS = [
   { key: 'retirement_risk', label: 'เกษียณ', labelEn: 'Retirement' },
   { key: 'transfer_risk', label: 'โอนย้าย', labelEn: 'Transfer' },
-  { key: 'burnout_risk', label: 'Burnout', labelEn: 'Burnout' },
+  { key: 'talent_loss_risk', label: 'สูญเสียทาเลนท์', labelEn: 'Talent Loss' },
+  { key: 'burnout_risk', label: 'เหนื่อยล้า', labelEn: 'Burnout' },
   { key: 'vacancy_risk', label: 'อัตราว่าง', labelEn: 'Vacancy' },
   { key: 'succession_risk', label: 'สืบทอด', labelEn: 'Succession' },
 ] as const

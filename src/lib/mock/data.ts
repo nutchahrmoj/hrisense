@@ -522,7 +522,7 @@ const highRiskCount = activePersonnel.filter(p => (p.overall_risk_score || 0) >=
 export const mockRiskDistribution = [
   { risk_type: 'retirement', risk_type_th: 'เสี่ยงเกษียณ', count: retirementRiskCount, percentage: pctOf(retirementRiskCount, activePersonnel.length) },
   { risk_type: 'transfer', risk_type_th: 'เสี่ยงโอนย้าย', count: transferRiskCount, percentage: pctOf(transferRiskCount, activePersonnel.length) },
-  { risk_type: 'talent_loss', risk_type_th: 'เสี่ยง Burnout', count: talentLossCount, percentage: pctOf(talentLossCount, activePersonnel.length) },
+  { risk_type: 'talent_loss', risk_type_th: 'เสี่ยงสูญเสียทาเลนท์', count: talentLossCount, percentage: pctOf(talentLossCount, activePersonnel.length) },
   { risk_type: 'burnout', risk_type_th: 'เสี่ยงเหนื่อยล้า (Burnout)', count: burnoutCount, percentage: pctOf(burnoutCount, activePersonnel.length) },
   { risk_type: 'high_risk', risk_type_th: 'เสี่ยงสูงทั้งหมด', count: highRiskCount, percentage: pctOf(highRiskCount, activePersonnel.length) },
 ]

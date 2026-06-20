@@ -35,7 +35,7 @@ export default async function PersonnelDetailPage({ params }: { params: { id: st
               <p className="text-3xl font-bold mt-2">{person.overall_risk_score?.toFixed(0) || '—'}</p>
               <p className="text-xs text-muted-foreground">คะแนนความเสี่ยงรวม</p>
             </div>
-            <div className="space-y-2">{[{l:'เกษียณ',v:person.retirement_risk,c:'bg-red-500'},{l:'โอนย้าย',v:person.transfer_risk,c:'bg-amber-500'},{l:'Burnout',v:person.talent_loss_risk,c:'bg-amber-500'},{l:'เหนื่อยล้า (Burnout)',v:(person as any).burnout_risk,c:'bg-orange-500'}].map((f: any) => (
+            <div className="space-y-2">{[{l:'เกษียณ',v:person.retirement_risk,c:'bg-red-500'},{l:'โอนย้าย',v:person.transfer_risk,c:'bg-amber-500'},{l:'สูญเสียทาเลนท์',v:person.talent_loss_risk,c:'bg-amber-500'},{l:'เหนื่อยล้า (Burnout)',v:(person as any).burnout_risk,c:'bg-orange-500'}].map((f: any) => (
               <div key={f.l}><div className="flex justify-between text-sm"><span>{f.l}</span><span>{f.v?.toFixed(0)||'—'}</span></div><div className="h-2 bg-muted rounded-full mt-1"><div className={cn('h-full rounded-full', f.c)} style={{width: (f.v||0) + '%'}}/></div></div>
             ))}</div>
           </CardContent>
