@@ -22,10 +22,10 @@ export const riskLabelTh: Record<RiskLevel, string> = {
 }
 
 export function getRiskLevel(score: number): RiskLevel {
-  if (score > 80) return 'critical'
-  if (score > 60) return 'red'
-  if (score > 40) return 'amber'
-  return 'green'
+  if (score > 80) return 'critical'   // 81-100 = วิกฤต
+  if (score > 70) return 'red'         // 71-80 = เสี่ยงสูง
+  if (score > 50) return 'amber'       // 51-70 = เฝ้าระวัง
+  return 'green'                        // ≤50 = ปกติ
 }
 
 export const riskChartColors = {
