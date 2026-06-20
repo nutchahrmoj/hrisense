@@ -274,8 +274,8 @@ const orgRiskProfile: Record<string, RiskProfile> = {
 }
 
 const profileParams: Record<RiskProfile, { transferP: number; transferRange: [number, number]; talentP: number; talentRange: [number, number]; burnoutP: number; burnoutRange: [number, number]; retBoost: number }> = {
-  critical: { transferP: 0.55, transferRange: [60, 90], talentP: 0.55, talentRange: [65, 95], burnoutP: 0.50, burnoutRange: [60, 90], retBoost: 15 },
-  high:     { transferP: 0.35, transferRange: [50, 78], talentP: 0.40, talentRange: [55, 82], burnoutP: 0.30, burnoutRange: [50, 78], retBoost: 8 },
+  critical: { transferP: 0.60, transferRange: [65, 95], talentP: 0.60, talentRange: [70, 98], burnoutP: 0.55, burnoutRange: [65, 95], retBoost: 20 },
+  high:     { transferP: 0.40, transferRange: [55, 82], talentP: 0.45, talentRange: [58, 85], burnoutP: 0.35, burnoutRange: [55, 82], retBoost: 12 },
   mixed:    { transferP: 0.20, transferRange: [48, 72], talentP: 0.25, talentRange: [50, 78], burnoutP: 0.18, burnoutRange: [30, 65], retBoost: 0 },
   low:      { transferP: 0.08, transferRange: [8, 30],  talentP: 0.10, talentRange: [10, 35], burnoutP: 0.06, burnoutRange: [10, 40], retBoost: -5 },
 }
