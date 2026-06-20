@@ -1,10 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const protectedRoutes = ['/dashboard', '/personnel', '/alerts', '/settings']
+const protectedRoutes = ['/dashboard', '/personnel', '/organizations', '/alerts', '/settings']
 const authRoutes = ['/login', '/forgot-password', '/reset-password']
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const isProtected = protectedRoutes.some((r) => pathname.startsWith(r))
+  const isAuth = authRoutes.some((r) => pathname.startsWith(r))
+
+  // Mock mode: skip auth checks entirely (no Supabase call needed)
+  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -30,15 +39,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  const pathname = request.nextUrl.pathname
-  const isProtected = protectedRoutes.some((r) => pathname.startsWith(r))
-  const isAuth = authRoutes.some((r) => pathname.startsWith(r))
-
-  // Mock mode: skip auth checks
-  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
-    return supabaseResponse
-  }
 
   // Redirect unauthenticated users away from protected routes
   if (isProtected && !user) {

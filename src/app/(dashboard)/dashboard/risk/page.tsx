@@ -11,6 +11,7 @@ import {
   ChevronRight, BarChart3, PieChart, LineChart
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { getRiskLevel } from '@/lib/utils/risk-colors'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
@@ -263,10 +264,10 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-right">
                       <span className={cn(
                         'font-bold font-mono',
-                        p.overall_risk_score > 80 && 'text-destructive',
-                        p.overall_risk_score > 60 && p.overall_risk_score <= 80 && 'text-red-600',
-                        p.overall_risk_score >= 25 && p.overall_risk_score < 50 && 'text-amber-600',
-                        p.overall_risk_score < 25 && 'text-green-600'
+                        getRiskLevel(p.overall_risk_score ?? 0) === 'critical' && 'text-destructive',
+                        getRiskLevel(p.overall_risk_score ?? 0) === 'red' && 'text-red-600',
+                        getRiskLevel(p.overall_risk_score ?? 0) === 'amber' && 'text-amber-600',
+                        getRiskLevel(p.overall_risk_score ?? 0) === 'green' && 'text-green-600'
                       )}>
                         {p.overall_risk_score?.toFixed(0)}
                       </span>
@@ -316,9 +317,9 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-center">
                       <span className={cn(
                         'inline-block px-2 py-1 rounded text-xs font-medium',
-                        (o.retirement_risk || 0) >= 75 ? 'bg-red-100 text-red-800' :
-                        (o.retirement_risk || 0) >= 50 ? 'bg-orange-100 text-orange-800' :
-                        (o.retirement_risk || 0) >= 25 ? 'bg-amber-100 text-amber-800' :
+                        getRiskLevel(o.retirement_risk ?? 0) === 'critical' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.retirement_risk ?? 0) === 'red' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.retirement_risk ?? 0) === 'amber' ? 'bg-amber-100 text-amber-800' :
                         'bg-green-100 text-green-800'
                       )}>
                         {o.retirement_risk?.toFixed(0) || '—'}
@@ -327,9 +328,9 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-center">
                       <span className={cn(
                         'inline-block px-2 py-1 rounded text-xs font-medium',
-                        (o.transfer_risk || 0) >= 75 ? 'bg-red-100 text-red-800' :
-                        (o.transfer_risk || 0) >= 50 ? 'bg-orange-100 text-orange-800' :
-                        (o.transfer_risk || 0) >= 25 ? 'bg-amber-100 text-amber-800' :
+                        getRiskLevel(o.transfer_risk ?? 0) === 'critical' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.transfer_risk ?? 0) === 'red' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.transfer_risk ?? 0) === 'amber' ? 'bg-amber-100 text-amber-800' :
                         'bg-green-100 text-green-800'
                       )}>
                         {o.transfer_risk?.toFixed(0) || '—'}
@@ -338,9 +339,9 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-center">
                       <span className={cn(
                         'inline-block px-2 py-1 rounded text-xs font-medium',
-                        (o.talent_loss_risk || 0) >= 75 ? 'bg-red-100 text-red-800' :
-                        (o.talent_loss_risk || 0) >= 50 ? 'bg-orange-100 text-orange-800' :
-                        (o.talent_loss_risk || 0) >= 25 ? 'bg-amber-100 text-amber-800' :
+                        getRiskLevel(o.talent_loss_risk ?? 0) === 'critical' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.talent_loss_risk ?? 0) === 'red' ? 'bg-red-100 text-red-800' :
+                        getRiskLevel(o.talent_loss_risk ?? 0) === 'amber' ? 'bg-amber-100 text-amber-800' :
                         'bg-green-100 text-green-800'
                       )}>
                         {o.talent_loss_risk?.toFixed(0) || '—'}
@@ -359,10 +360,10 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-center">
                       <span className={cn(
                         'font-bold font-mono',
-                        (o.overall_risk_score || 0) >= 75 && 'text-destructive',
-                        (o.overall_risk_score || 0) >= 50 && (o.overall_risk_score || 0) < 75 && 'text-red-600',
-                        (o.overall_risk_score || 0) >= 25 && (o.overall_risk_score || 0) < 50 && 'text-amber-600',
-                        (o.overall_risk_score || 0) < 25 && 'text-green-600'
+                        getRiskLevel(o.overall_risk_score ?? 0) === 'critical' && 'text-destructive',
+                        getRiskLevel(o.overall_risk_score ?? 0) === 'red' && 'text-red-600',
+                        getRiskLevel(o.overall_risk_score ?? 0) === 'amber' && 'text-amber-600',
+                        getRiskLevel(o.overall_risk_score ?? 0) === 'green' && 'text-green-600'
                       )}>
                         {o.overall_risk_score?.toFixed(0) || '—'}
                       </span>

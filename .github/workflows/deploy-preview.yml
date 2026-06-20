@@ -9,15 +9,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # ─── Preflight: Check which secrets are available ──────────────────────
+  preflight:
+    name: Check Secrets
+    runs-on: ubuntu-latest
+    outputs:
+      has_vercel: ${{ steps.check.outputs.has_vercel }}
+    steps:
+      - name: Check available secrets
+        id: check
+        run: |
+          if [ -n "${{ secrets.VERCEL_TOKEN }}" ] && [ -n "${{ secrets.VERCEL_ORG_ID }}" ] && [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ]; then
+            echo "has_vercel=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_vercel=false" >> "$GITHUB_OUTPUT"
+          fi
+
   # ─── Deploy Preview to Vercel ──────────────────────────────────────────
   deploy-preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
-    # Skip ถ้าไม่มี Vercel secrets
-    if: >-
-      ${{ secrets.VERCEL_TOKEN != '' &&
-          secrets.VERCEL_ORG_ID != '' &&
-          secrets.VERCEL_PROJECT_ID != '' }}
+    needs: preflight
+    if: needs.preflight.outputs.has_vercel == 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -57,10 +70,8 @@ jobs:
   notify-skipped:
     name: Check Preview Configuration
     runs-on: ubuntu-latest
-    if: >-
-      ${{ secrets.VERCEL_TOKEN == '' ||
-          secrets.VERCEL_ORG_ID == '' ||
-          secrets.VERCEL_PROJECT_ID == '' }}
+    needs: preflight
+    if: needs.preflight.outputs.has_vercel == 'false'
     steps:
       - name: Notify — Preview skipped
         run: |
