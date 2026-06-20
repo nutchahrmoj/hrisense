@@ -27,10 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="th" className={notoSansThai.variable}>
       <body className="min-h-screen bg-background font-thai antialiased">
         {children}
-      {/* impeccable-live-start */}
-<script src="http://localhost:8400/live.js"></script>
-{/* impeccable-live-end */}
-</body>
+      </body>
     </html>
   )
 }

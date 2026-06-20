@@ -4,23 +4,29 @@ on:
   pull_request:
     branches: [main, develop]
 
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  # Deploy preview to Vercel
+  # ─── Deploy Preview to Vercel ──────────────────────────────────────────
   deploy-preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
+    # Skip ถ้าไม่มี Vercel secrets
+    if: >-
+      ${{ secrets.VERCEL_TOKEN != '' &&
+          secrets.VERCEL_ORG_ID != '' &&
+          secrets.VERCEL_PROJECT_ID != '' }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
       - name: Deploy to Vercel (Preview)
         uses: amondnet/vercel-action@v25
@@ -44,30 +50,19 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ` **Preview Deployment**\n\nView the preview: ${previewUrl}`
+              body: `🚀 **Preview Deployment**\n\nView the preview: ${previewUrl}`
             });
 
-  # Database migration for preview
-  db-preview:
-    name: Database Migration (Preview)
+  # ─── แจ้งเตือนถ้าไม่มี secrets ───────────────────────────────────────────
+  notify-skipped:
+    name: Check Preview Configuration
     runs-on: ubuntu-latest
+    if: >-
+      ${{ secrets.VERCEL_TOKEN == '' ||
+          secrets.VERCEL_ORG_ID == '' ||
+          secrets.VERCEL_PROJECT_ID == '' }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Supabase CLI
-        uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Start Supabase
-        run: supabase start
-
-      - name: Run migrations
-        run: supabase db push
-        env:
-          SUPABASE_DB_PASSWORD: postgres
-
-      - name: Stop Supabase
-        if: always()
-        run: supabase stop
+      - name: Notify — Preview skipped
+        run: |
+          echo "::notice::⚠️ Preview deployment skipped — Vercel secrets not configured."
+          echo "To enable preview deployments, add VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID secrets."

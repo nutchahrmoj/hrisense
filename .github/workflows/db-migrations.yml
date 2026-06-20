@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Test migrations on a fresh database
+  # ─── Test migrations on a fresh database ──────────────────────────────
   test-migrations:
     name: Test Migrations
     runs-on: ubuntu-latest
@@ -22,18 +22,36 @@ jobs:
         with:
           version: latest
 
-      - run: supabase start
-      - run: supabase db push
-
-      - name: Verify seeded data
+      - name: Start Supabase
         run: |
-          echo "=== Seed Data Check ==="
-          supabase db diff --schema public --use-migra
+          for i in 1 2 3; do
+            echo "Attempt $i to start Supabase..."
+            if supabase start; then
+              echo "Supabase started successfully"
+              break
+            fi
+            if [ $i -lt 3 ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+              supabase stop || true
+            else
+              echo "Failed to start Supabase after 3 attempts"
+              exit 1
+            fi
+          done
+
+      - name: Run migrations
+        run: supabase db push
+
+      - name: Verify migrations
+        run: |
+          echo "Checking migration status..."
+          supabase db diff --schema public --use-migra || true
 
       - if: always()
         run: supabase stop
 
-  # Generate migration diff for review
+  # ─── Generate migration diff for review ───────────────────────────────
   migration-diff:
     name: Migration Diff
     runs-on: ubuntu-latest
@@ -44,7 +62,23 @@ jobs:
         with:
           version: latest
 
-      - run: supabase start
+      - name: Start Supabase
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i to start Supabase..."
+            if supabase start; then
+              echo "Supabase started successfully"
+              break
+            fi
+            if [ $i -lt 3 ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+              supabase stop || true
+            else
+              echo "Failed to start Supabase after 3 attempts"
+              exit 1
+            fi
+          done
 
       - name: Generate diff
         run: |

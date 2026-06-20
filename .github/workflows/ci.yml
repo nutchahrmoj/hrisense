@@ -72,18 +72,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: supabase/setup-cli@v1
         with:
           version: latest
-      - run: supabase start
-      - run: supabase db push
+
+      - name: Start Supabase
+        run: |
+          # Start supabase with retries
+          for i in 1 2 3; do
+            echo "Attempt $i to start Supabase..."
+            if supabase start; then
+              echo "Supabase started successfully"
+              break
+            fi
+            if [ $i -lt 3 ]; then
+              echo "Retrying in 10 seconds..."
+              sleep 10
+              supabase stop || true
+            else
+              echo "Failed to start Supabase after 3 attempts"
+              exit 1
+            fi
+          done
+
+      - name: Run migrations
+        run: supabase db push
+
       - name: Verify data seeded
         run: |
-          ORG_COUNT=$(supabase db execute --file - <<'SQL'
-          SELECT COUNT(*) AS count FROM organizations;
+          echo "Checking seeded data..."
+          supabase db execute --file - <<'SQL'
+          SELECT COUNT(*) AS organization_count FROM organizations;
           SQL
-          )
-          echo "Organizations: $ORG_COUNT"
+
       - if: always()
         run: supabase stop
 
