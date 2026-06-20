@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, AlertTriangle, BarChart3,
-  Users, Bell, Settings, Shield, Target, BookOpen
+  Users, Bell, Settings, Shield, Target, BookOpen, Building2
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/dashboard/vacancy', label: 'วิเคราะห์อัตรากำลัง', icon: BarChart3 },
   { href: '/dashboard/succession', label: 'แผนสืบทอดตำแหน่ง', icon: Target },
   { href: '/dashboard/idp', label: 'แผนพัฒนารายบุคคล', icon: BookOpen },
+  { href: '/organizations', label: 'หน่วยงาน', icon: Building2 },
   { href: '/personnel', label: 'ข้อมูลบุคลากร', icon: Users },
   { href: '/alerts', label: 'การแจ้งเตือน', icon: Bell },
   { href: '/settings', label: 'ตั้งค่า', icon: Settings },
