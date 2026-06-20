@@ -396,6 +396,45 @@ for (const p of seedPersonnel) {
 
 export const mockPersonnel = [...seedPersonnel, ...generatePersonnel()]
 
+// Post-processing: ensure critical/high orgs have at least 1-2 critical personnel
+// and fix seed personnel risk_level to match current thresholds.
+const criticalOrgs = ['org-8', 'org-14', 'org-19']
+const highOrgs = ['org-4', 'org-10', 'org-13', 'org-16']
+
+for (const p of mockPersonnel) {
+  // Fix risk_level to match current thresholds
+  p.risk_level = riskLevelFromScore(p.overall_risk_score || 0)
+
+  // Ensure critical orgs have at least 2 personnel with score > 80
+  if (criticalOrgs.includes(p.organization_id)) {
+    const orgCriticalCount = mockPersonnel.filter(
+      x => x.organization_id === p.organization_id && (x.overall_risk_score || 0) > 80
+    ).length
+    if (orgCriticalCount < 2 && p.status === 'active' && (p.overall_risk_score || 0) > 50 && (p.overall_risk_score || 0) <= 80) {
+      // Bump this person to critical
+      p.overall_risk_score = round2g(rand(82, 92))
+      p.retirement_risk = round2g(rand(75, 95))
+      p.transfer_risk = round2g(rand(65, 90))
+      p.talent_loss_risk = round2g(rand(70, 95))
+      p.risk_level = riskLevelFromScore(p.overall_risk_score)
+    }
+  }
+
+  // Ensure high orgs have at least 1 personnel with score > 80
+  if (highOrgs.includes(p.organization_id)) {
+    const orgCriticalCount = mockPersonnel.filter(
+      x => x.organization_id === p.organization_id && (x.overall_risk_score || 0) > 80
+    ).length
+    if (orgCriticalCount < 1 && p.status === 'active' && (p.overall_risk_score || 0) > 50 && (p.overall_risk_score || 0) <= 80) {
+      p.overall_risk_score = round2g(rand(81, 88))
+      p.retirement_risk = round2g(rand(70, 90))
+      p.transfer_risk = round2g(rand(60, 85))
+      p.talent_loss_risk = round2g(rand(65, 90))
+      p.risk_level = riskLevelFromScore(p.overall_risk_score)
+    }
+  }
+}
+
 const activePersonnel = mockPersonnel.filter(p => p.status === 'active')
 const round2 = (n: number) => Math.round(n * 100) / 100
 
