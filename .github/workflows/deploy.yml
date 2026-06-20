@@ -4,10 +4,10 @@ name: CD Pipeline (Deploy)
 #   1. Apply database migrations to production Supabase
 #   2. Deploy frontend to Vercel
 #
-# Required GitHub Secrets:
-#   SUPABASE_PROD_URL          — URL ของ Supabase production (self-hosted หรือ cloud)
-#   SUPABASE_PROD_SERVICE_KEY  — Service role key ของ production
+# Required GitHub Secrets (workflow จะ skip ถ้าไม่มี):
+#   SUPABASE_ACCESS_TOKEN, SUPABASE_PROD_PROJECT_REF, SUPABASE_PROD_DB_PASSWORD
 #   VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+#   NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 on:
   push:
@@ -22,6 +22,11 @@ jobs:
   migrate:
     name: Migrate Database
     runs-on: ubuntu-latest
+    # Skip ถ้าไม่มี secrets สำหรับ Supabase
+    if: >-
+      ${{ secrets.SUPABASE_ACCESS_TOKEN != '' &&
+          secrets.SUPABASE_PROD_PROJECT_REF != '' &&
+          secrets.SUPABASE_PROD_DB_PASSWORD != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -50,6 +55,12 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     needs: migrate
+    # Skip ถ้าไม่มี secrets สำหรับ Vercel
+    if: >-
+      ${{ always() &&
+          secrets.VERCEL_TOKEN != '' &&
+          secrets.VERCEL_ORG_ID != '' &&
+          secrets.VERCEL_PROJECT_ID != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -74,3 +85,27 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-args: '--prod'
           working-directory: ./
+
+  # ─── แจ้งเตือนถ้าไม่มี secrets ───────────────────────────────────────────
+  check-secrets:
+    name: Check Deploy Configuration
+    runs-on: ubuntu-latest
+    if: >-
+      ${{ secrets.SUPABASE_ACCESS_TOKEN == '' ||
+          secrets.VERCEL_TOKEN == '' }}
+    steps:
+      - name: Notify — Deploy skipped (secrets not configured)
+        run: |
+          echo "::notice::⚠️ Deploy workflow skipped — required secrets not configured."
+          echo ""
+          echo "To enable auto-deploy, add these GitHub Secrets:"
+          echo "  - SUPABASE_ACCESS_TOKEN"
+          echo "  - SUPABASE_PROD_PROJECT_REF"
+          echo "  - SUPABASE_PROD_DB_PASSWORD"
+          echo "  - VERCEL_TOKEN"
+          echo "  - VERCEL_ORG_ID"
+          echo "  - VERCEL_PROJECT_ID"
+          echo "  - NEXT_PUBLIC_SUPABASE_URL"
+          echo "  - NEXT_PUBLIC_SUPABASE_ANON_KEY"
+          echo ""
+          echo "See CONTRIBUTING.md for details."
