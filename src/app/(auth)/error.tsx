@@ -7,6 +7,9 @@ export default function AuthError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  // Log full error; never render raw error.message to users.
+  console.error('Auth error:', error)
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5">
       <div className="w-full max-w-md p-8 text-center space-y-4">
@@ -16,7 +19,7 @@ export default function AuthError({
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-foreground">เกิดข้อผิดพลาด</h2>
-        <p className="text-sm text-muted-foreground">{error.message || 'ไม่สามารถโหลดหน้านี้ได้'}</p>
+        <p className="text-sm text-muted-foreground">ไม่สามารถโหลดหน้านี้ได้ กรุณาลองใหม่อีกครั้ง</p>
         <button
           onClick={reset}
           className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"

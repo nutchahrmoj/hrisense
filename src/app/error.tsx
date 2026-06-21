@@ -7,6 +7,9 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  // Log full error server/client-side; never render raw error.message to users.
+  console.error('Global error:', error)
+
   return (
     <html>
       <body>
@@ -18,7 +21,7 @@ export default function GlobalError({
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-foreground">เกิดข้อผิดพลาด</h2>
-            <p className="text-sm text-muted-foreground">{error.message || 'เกิดข้อผิดพลาดในระบบ'}</p>
+            <p className="text-sm text-muted-foreground">เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง</p>
             <button
               onClick={reset}
               className="px-6 py-2 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"
