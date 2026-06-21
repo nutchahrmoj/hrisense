@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function RetirementPage() {
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.from('v_retirement_timeline').select('*').order('retirement_date')
+  const { data, error } = await supabase.from('v_retirement_timeline').select('*').order('retirement_date')
+  if (error) throw error
 
   const retiring1yr = data?.filter((r: any) => (r.retirement_years_remaining || 99) <= 1).length || 0
   const retiring3yr = data?.filter((r: any) => (r.retirement_years_remaining || 99) <= 3).length || 0

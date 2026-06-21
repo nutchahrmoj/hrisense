@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function PersonnelPage() {
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.from('v_personnel_overview').select('*').limit(100)
+  const { data, error } = await supabase.from('v_personnel_overview').select('*').limit(100)
+  if (error) throw error
 
   return (
     <div className="space-y-6">

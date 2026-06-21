@@ -9,10 +9,13 @@ export const dynamic = 'force-dynamic'
 export default async function OrganizationDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
 
-  const [{ data: org }, { data: personnel }] = await Promise.all([
+  const [{ data: org, error: orgError }, { data: personnel, error: personnelError }] = await Promise.all([
     supabase.from('v_org_dashboard').select('*').eq('organization_id', params.id).single(),
     supabase.from('v_personnel_overview').select('*').eq('organization_id', params.id).order('full_name_th'),
   ])
+  // .single() returns an error when no row matches; treat that as "not found", not a thrown error.
+  if (orgError && orgError.code !== 'PGRST116') throw orgError
+  if (personnelError) throw personnelError
 
   if (!org) {
     return (

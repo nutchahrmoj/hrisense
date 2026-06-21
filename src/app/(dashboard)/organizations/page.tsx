@@ -8,10 +8,11 @@ export const dynamic = 'force-dynamic'
 
 export default async function OrganizationsPage() {
   const supabase = await createServerSupabaseClient()
-  const { data: orgs } = await supabase
+  const { data: orgs, error } = await supabase
     .from('v_org_dashboard')
     .select('*')
     .order('name_th')
+  if (error) throw error
 
   return (
     <div className="space-y-6">
