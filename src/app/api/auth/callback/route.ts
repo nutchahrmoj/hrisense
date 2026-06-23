@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { sanitizeRedirectPath } from '@/lib/security/redirect-guard'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   const next = searchParams.get('next') ?? '/dashboard'
 
   // Open-redirect guard: only allow same-origin relative paths
-  const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
+  const safeNext = sanitizeRedirectPath(next)
 
   if (code) {
     const supabase = await createServerSupabaseClient()
