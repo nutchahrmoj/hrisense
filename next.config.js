@@ -12,6 +12,22 @@ const nextConfig = {
     ],
   },
   async headers() {
+    // CSP: tailored for Next.js + Supabase + Tailwind
+    // Uses 'unsafe-inline' for styles (Tailwind) and 'unsafe-eval' for dev HMR.
+    // In production, Next.js injects nonces automatically — consider tightening later.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      `img-src 'self' data: blob: ${supabaseUrl}`,
+      `font-src 'self' data:`,
+      `connect-src 'self' ${supabaseUrl} wss:`,
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join('; ')
+
     return [
       {
         source: '/(.*)',
@@ -22,6 +38,7 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          { key: 'Content-Security-Policy', value: csp },
         ],
       },
     ]

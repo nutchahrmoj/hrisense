@@ -53,6 +53,19 @@ export default function LoginPage() {
       })
 
       if (error) {
+        // Record failed attempt for rate limiting
+        try {
+          const res = await fetch('/api/auth/login-attempt', { method: 'POST' })
+          const data = await res.json()
+          if (data.remaining === 0) {
+            setApiError(data.message)
+            setLoading(false)
+            return
+          }
+        } catch {
+          // Rate limit recording failed — continue with normal error
+        }
+
         if (error.message.includes('Invalid login credentials')) {
           setApiError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
         } else if (error.message.includes('Email not confirmed')) {

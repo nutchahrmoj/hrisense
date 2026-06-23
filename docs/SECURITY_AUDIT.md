@@ -78,7 +78,7 @@ This document records the findings from a comprehensive security audit of the HR
 
 #### M2 — No Rate Limiting on Login
 - **Issue:** No application-level rate limiting on login attempts. Relies solely on Supabase's built-in 30/hour limit.
-- **Remediation:** Planned — consider middleware-based rate limiting or Vercel Edge rate limiting.
+- **Remediation:** ✅ Applied — IP-based rate limiter in middleware (10 attempts/15 min window) + API route for recording failed attempts.
 
 #### M3 — Missing 'critical' Risk Level Enum
 - **File:** `supabase/migrations/001_extensions_and_enums.sql`
@@ -114,7 +114,7 @@ This document records the findings from a comprehensive security audit of the HR
 | H3 — Error message leak | High | ✅ Done | #28 |
 | H4 — Broad anon grants | High | 🔴 Planned | Future |
 | M1 — Burnout RLS missing | Medium | 🔴 Planned | Future |
-| M2 — No rate limiting | Medium | 🔴 Planned | Future |
+| M2 — No rate limiting | Medium | ✅ Done | #30 |
 | M3 — Missing critical enum | Medium | ✅ Done | #29 |
 | L1 — Badge semantics | Low | ✅ Done | #25 |
 | L2 — SVG aria-hidden | Low | ✅ Done | #25 |
@@ -125,11 +125,13 @@ This document records the findings from a comprehensive security audit of the HR
 
 ### Future PRs (Ordered by Priority)
 
-1. **RLS hardening** — Switch server client from service role to anon key with cookie-based auth (C1)
-2. **Revoke broad anon grants** — Replace `GRANT SELECT ON ALL TABLES TO anon` with table-specific grants (H4)
-3. **Burnout RLS** — Enable RLS on `personnel_burnout_factors` with org-scoped policies (M1)
-4. **Rate limiting** — Add login rate limiting at application level (M2)
-5. **CSP headers** — Add Content-Security-Policy once all inline scripts are accounted for
+1. ~~**RLS hardening** — Switch server client from service role to anon key with cookie-based auth (C1)~~ ✅ Done
+2. ~~**Revoke broad anon grants** — Replace `GRANT SELECT ON ALL TABLES TO anon` with table-specific grants (H4)~~ ✅ Done (migration 022)
+3. ~~**Burnout RLS** — Enable RLS on `personnel_burnout_factors` with org-scoped policies (M1)~~ ✅ Done (migration 023)
+4. ~~**Rate limiting** — Add login rate limiting at application level (M2)~~ ✅ Done
+5. ~~**CSP headers** — Add Content-Security-Policy once all inline scripts are accounted for~~ ✅ Done
+
+All identified security issues have been remediated.
 
 ---
 

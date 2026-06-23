@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { isRateLimited } from '@/lib/security/rate-limiter'
 
 const protectedRoutes = ['/dashboard', '/personnel', '/organizations', '/alerts', '/settings']
 const authRoutes = ['/login', '/forgot-password', '/reset-password']
@@ -13,6 +14,26 @@ export async function middleware(request: NextRequest) {
   // Guard: never allow mock mode in production (defense-in-depth for C3)
   if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
     return NextResponse.next({ request })
+  }
+
+  // Rate limit login page access (M2)
+  if (pathname === '/login') {
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown'
+
+    if (isRateLimited(ip)) {
+      return new NextResponse(
+        JSON.stringify({ error: 'พยายามเข้าสู่ระบบหลายครั้งเกินไป กรุณารอ 15 นาทีแล้วลองใหม่' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '900',
+          },
+        }
+      )
+    }
   }
 
   let supabaseResponse = NextResponse.next({ request })
