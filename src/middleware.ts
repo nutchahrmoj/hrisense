@@ -10,7 +10,8 @@ export async function middleware(request: NextRequest) {
   const isAuth = authRoutes.some((r) => pathname.startsWith(r))
 
   // Mock mode: skip auth checks entirely (no Supabase call needed)
-  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+  // Guard: never allow mock mode in production (defense-in-depth for C3)
+  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
     return NextResponse.next({ request })
   }
 
@@ -35,10 +36,20 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session — with error fallback for auth service failures
+  let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    // Auth service failure — redirect protected routes to login
+    if (isProtected) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+    return supabaseResponse
+  }
 
   // Redirect unauthenticated users away from protected routes
   if (isProtected && !user) {

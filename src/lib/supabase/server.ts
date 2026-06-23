@@ -1,25 +1,17 @@
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import type { Database } from '@/lib/types/database'
 import { createMockServerClient } from '@/lib/mock/client'
 
+/**
+ * Cookie-based server client — respects RLS policies.
+ * Use this for all server-side data fetching (server components, API routes).
+ */
 export async function createServerSupabaseClient() {
-  if (process.env.USE_MOCK === 'true') {
+  if (process.env.USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
     return createMockServerClient() as any
   }
 
-  // Server-side data fetching uses the service role key to bypass RLS.
-  // Auth/session handling uses the cookie-based client below if needed.
-  return createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { auth: { persistSession: false } }
-  ) as any
-}
-
-// Cookie-based client for auth flows (login, session refresh)
-export async function createAuthClient() {
   const cookieStore = await cookies()
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,4 +27,12 @@ export async function createAuthClient() {
       },
     }
   )
+}
+
+/**
+ * Alias for createServerSupabaseClient — kept for backward compatibility.
+ * Both return the same cookie-based anon-key client.
+ */
+export async function createAuthClient() {
+  return createServerSupabaseClient()
 }
