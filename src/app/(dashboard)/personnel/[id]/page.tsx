@@ -22,7 +22,7 @@ export default async function PersonnelDetailPage({ params }: { params: { id: st
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card><CardHeader><CardTitle>ข้อมูลส่วนตัว</CardTitle></CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">เลขบัตรประชาชน</span><span>{person.citizen_id ? 'XXX-XXX-X' + person.citizen_id.slice(-4) + ' ' + person.citizen_id.slice(-1) : '—'}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">เลขบัตรประชาชน</span><span>{person.citizen_id ? 'XXX-XXX-X' + person.citizen_id.slice(-4) : '—'}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">วันเกิด</span><span><ThaiDate date={person.birth_date}/></span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">วันเกษียณ</span><span><ThaiDate date={person.retirement_date}/></span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">เงินเดือน</span><span>{person.salary ? person.salary.toLocaleString() + ' บาท' : '—'}</span></div>
