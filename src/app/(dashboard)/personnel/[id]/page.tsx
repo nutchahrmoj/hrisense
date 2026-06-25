@@ -8,12 +8,14 @@ export const dynamic = 'force-dynamic'
 
 export default async function PersonnelDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
-  const { data: person } = await supabase
+  const { data: person, error } = await supabase
     .from('v_personnel_overview')
     .select('*')
     .eq('id', params.id)
-    .single() as { data: any }
+    .single() as { data: any; error: { code?: string } | null }
 
+  // .single() errors with PGRST116 when no row matches — that's "not found", not a failure.
+  if (error && error.code !== 'PGRST116') throw error
   if (!person) return <div className="p-6 text-center text-muted-foreground">ไม่พบข้อมูล</div>
 
   return (

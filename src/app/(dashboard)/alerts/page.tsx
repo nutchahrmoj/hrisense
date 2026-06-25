@@ -7,7 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function AlertsPage() {
   const supabase = await createServerSupabaseClient()
-  const { data } = await supabase.from('v_active_alerts').select('*').order('created_at', { ascending: false })
+  const { data, error } = await supabase.from('v_active_alerts').select('*').order('created_at', { ascending: false })
+  if (error) throw error
 
   const sevBadge = (s: string) => {
     if (s === 'emergency' || s === 'critical') return 'bg-red-100 text-red-800'
