@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isRateLimited } from '@/lib/security/rate-limiter'
+import { getSupabaseConfig } from '@/lib/security/supabase-config'
 
 const protectedRoutes = ['/dashboard', '/personnel', '/organizations', '/alerts', '/settings']
 const authRoutes = ['/login', '/forgot-password', '/reset-password']
@@ -36,26 +37,36 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Defense-in-depth: createServerClient (@supabase/ssr) throws synchronously
+  // when the Supabase URL/key are missing. That throw is uncaught here and
+  // previously crashed the middleware on EVERY request — on Vercel this was
+  // `X-Vercel-Error: MIDDLEWARE_INVOCATION_FAILED` and a blank 500 on the whole
+  // site when the project env vars weren't configured. Fail with a clear,
+  // actionable message instead of a cryptic edge crash.
+  const config = getSupabaseConfig()
+  if (!config) {
+    return new NextResponse(
+      'Configuration error: Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) are not set. Configure them in the deployment environment and redeploy.',
+      { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
+    )
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
-        },
+  const supabase = createServerClient(config.url, config.anonKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll()
       },
-    }
-  )
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        supabaseResponse = NextResponse.next({ request })
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        )
+      },
+    },
+  })
 
   // Refresh session — with error fallback for auth service failures
   let user: Awaited<ReturnType<typeof supabase.auth.getUser>>['data']['user'] = null
