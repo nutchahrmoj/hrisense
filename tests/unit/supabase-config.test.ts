@@ -49,4 +49,29 @@ describe('getSupabaseConfig', () => {
       })
     ).toEqual({ url: 'https://x.supabase.co', anonKey: 'anon-key' })
   })
+
+  describe('publishable key fallback', () => {
+    // Supabase's newer naming calls the public key "publishable". Accept it as
+    // a fallback so a project configured with NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    // works without a rename.
+
+    it('คืน config เมื่อมีแค่ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (ไม่มี ANON_KEY)', () => {
+      expect(
+        getSupabaseConfig({
+          NEXT_PUBLIC_SUPABASE_URL: 'https://x.supabase.co',
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'pub-key',
+        })
+      ).toEqual({ url: 'https://x.supabase.co', anonKey: 'pub-key' })
+    })
+
+    it('ให้ ANON_KEY priority เหนือ PUBLISHABLE_KEY เมื่อมีทั้งคู่', () => {
+      expect(
+        getSupabaseConfig({
+          NEXT_PUBLIC_SUPABASE_URL: 'https://x.supabase.co',
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-key',
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'pub-key',
+        })
+      ).toEqual({ url: 'https://x.supabase.co', anonKey: 'anon-key' })
+    })
+  })
 })
