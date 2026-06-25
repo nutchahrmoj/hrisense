@@ -23,7 +23,10 @@ export function getSupabaseConfig(
   env: Record<string, string | undefined> = process.env
 ): SupabaseConfig | null {
   const url = env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  // Supabase renamed the public key from "anon" to "publishable" in newer
+  // dashboards. Accept either name so a project configured with either works;
+  // anon takes precedence when both are present.
+  const anonKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   if (!url || !anonKey) return null
   return { url, anonKey }
 }

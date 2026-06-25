@@ -46,7 +46,7 @@ export async function middleware(request: NextRequest) {
   const config = getSupabaseConfig()
   if (!config) {
     return new NextResponse(
-      'Configuration error: Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) are not set. Configure them in the deployment environment and redeploy.',
+      'Configuration error: Supabase environment variables are not set. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) in the deployment environment and redeploy.',
       { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }
     )
   }
