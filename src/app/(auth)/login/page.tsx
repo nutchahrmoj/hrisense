@@ -94,8 +94,18 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard')
       }
-    } catch {
-      setApiError('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้')
+    } catch (err) {
+      // Surface the real error instead of swallowing it. A missing
+      // NEXT_PUBLIC_ Supabase var throws here (createClient) and previously
+      // logged nothing — making it look like a generic "server unreachable".
+      console.error('[login] sign-in failed:', err)
+      const isConfigError =
+        err instanceof Error && /not configured/i.test(err.message)
+      setApiError(
+        isConfigError
+          ? 'ระบบยังไม่ได้ตั้งค่าการเชื่อมต่อเซิร์ฟเวอร์ กรุณาแจ้งผู้ดูแลระบบ'
+          : 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง'
+      )
       setLoading(false)
     }
   }
