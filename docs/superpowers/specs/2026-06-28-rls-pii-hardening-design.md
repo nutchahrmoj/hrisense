@@ -25,7 +25,7 @@ A re-check of upstream `main` (`7b1cf25`) showed the bulk of the original audit 
 **The one gap that remains:** Postgres views in this project are still `security_definer` (the default), so a view executes with its **owner's** privileges. In Supabase the owner is a superuser-level role that **bypasses RLS**. Even though base tables have RLS enabled and `anon` was revoked in `022`, an `authenticated` caller that still holds `SELECT` on a view can read PII **across organizations** because the view does not honor the caller's RLS policies.
 
 ### 1.2 In scope
-- Migration `025_view_security_invoker.sql`: `ALTER VIEW ... SET (security_invoker = true)` on **all 20 views**.
+- Migration `025_view_security_invoker.sql`: `ALTER VIEW ... SET (security_invoker = true)` on **all 22 views** (see §2.3 for the corrected inventory).
 
 ### 1.3 Out of scope (intentional — already shipped or YAGNI)
 - RLS policy rewrite / anon revoke (done in `022`).
@@ -48,11 +48,11 @@ Postgres views default to running with the owner's privileges. In Supabase the v
 > Note: `022_rls_hardening.sql` revoked `anon` grants but **did not** touch view invoker semantics, and `019_grant_view_permissions.sql` had earlier granted `SELECT ON ALL TABLES` (which includes views) to `authenticated`. That grant still stands in `022` (which re-grants `SELECT ON ALL TABLES` to `authenticated`). So the leak path via views is open.
 
 ### 2.2 Fix — `security_invoker = true`
-A single migration flips all 20 views to run with the **caller's** privileges, so RLS policies on the base tables are honored:
+A single migration flips all 22 views to run with the **caller's** privileges, so RLS policies on the base tables are honored:
 
 ```sql
 ALTER VIEW v_personnel_overview SET (security_invoker = true);
--- ... 20 views total
+-- ... 22 views total
 ```
 
 Properties:
@@ -95,7 +95,7 @@ From `021_add_burnout_risk.sql` (2):
 | # | Risk | Likelihood | Impact | Mitigation |
 |---|------|-----------|--------|-----------|
 | R1 | Views aggregating across tables return too few rows once caller RLS applies → dashboard empty state | Medium | Medium | Verify base-table policies permit `authenticated` broadly enough; test dashboard flow end-to-end |
-| R2 | Some base table lacks a policy → view returns 0 rows after invoker flip | Medium | Medium | Audit policies on every base table referenced by the 20 views; test multi-join views first (`v_org_dashboard`, `v_personnel_overview`) |
+| R2 | Some base table lacks a policy → view returns 0 rows after invoker flip | Medium | Medium | Audit policies on every base table referenced by the 22 views; test multi-join views first (`v_org_dashboard`, `v_personnel_overview`, `v_burnout_analysis`) |
 | R3 | Runtime PG < 15 despite `config.toml` → `ALTER VIEW SET` errors | Low | High | `supabase status` to confirm version before migration; fallback = ask owner to upgrade |
 | R4 | Removing `as any` breaks TS build | Low | Low | Keep `as any` cleanup in a separate trailing commit; drop from PR if it fails |
 
