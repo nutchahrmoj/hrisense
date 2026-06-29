@@ -40,18 +40,14 @@ Use the Supabase CLI to apply the missing migrations: `supabase link` → assess
 
 1. **Resolve duplicate migration version `022`.** Two files share prefix `022`: `022_rls_hardening.sql` (from PR #24) and `022_seed_burnout_data.sql`. The CLI requires unique version numbers. Plan: rename `022_seed_burnout_data.sql` → `025_seed_burnout_data.sql` (seed has no dependents; runs as superuser so post-RLS ordering is fine). Verify dependencies by reading each burnout migration during implementation.
 
-## Open decision: seed data in production
+## Decision: seed data in production — INCLUDE
 
-Migrations `017_comprehensive_seed_data.sql` and (renamed) `025_seed_burnout_data.sql` insert **sample/demo** personnel. Applying them to the production remote populates demo data. Two options:
-- **Include** — production gets demo data (useful for a pre-launch / demo deploy).
-- **Exclude** — rename these to `.bak` (like `014`/`015` already are) so `db push` skips them; production stays empty of demo data.
-
-**Recommendation: exclude** (`.bak`) for a real production deploy; the user decides.
+Migrations `017_comprehensive_seed_data.sql` and (renamed) `025_seed_burnout_data.sql` insert **sample/demo** personnel. **Decision: include them** — production gets demo data so the app is immediately usable/viewable. Both stay active (not `.bak`).
 
 ## Execution (high-level — detailed in PRP-Plan)
 
 1. Resolve the `022` duplicate (rename seed → `025`) on this branch.
-2. Decide seed inclusion (above); `.bak`-rename if excluding.
+2. Seed data: **include** (017 + renamed 025 stay active — see Decision above).
 3. `supabase link --project-ref euybvugftjbezklgmxuw` (user provides token / db password).
 4. `supabase migration list` — see what the remote has tracked vs. local.
 5. **Drift handling:** the remote has tables 001–008 but its migration-tracking state is unknown. If `db push` reports conflicts (tables already exist), reconcile — likely by marking 001–008 as already applied (`supabase migration repair --status applied ...`) so only 009+ get applied.
