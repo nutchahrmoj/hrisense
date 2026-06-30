@@ -8,15 +8,13 @@ next-env.d.ts
 supabase/.temp/
 playwright-report/
 test-results/
+.vercel
 
 # Local credential store (Supabase keys, OAuth tokens, rotation backups).
-# Never tracked — see docs/superpowers/specs/2026-06-30-secrets-rotation-design.md
+# Never track these; see docs/superpowers/specs/2026-06-30-secrets-rotation-design.md
 secrets/
 secrets/**/*.bak
 *.env.backup
 
-# Reserved Windows device names (e.g. accidental "TASKKILL /F F:/" → nul file)
+# Reserved Windows device names.
 nul
-
-
-.vercel
