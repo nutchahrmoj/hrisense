@@ -16,7 +16,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.1.0",
+    "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.39.0",
     "@tanstack/react-table": "^8.11.0",
     "class-variance-authority": "^0.7.0",
