@@ -5,4 +5,9 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 .claude/
+
+# Local credential store (Supabase keys, OAuth tokens, rotation backups).
+# Never tracked — see docs/superpowers/specs/2026-06-30-secrets-rotation-design.md
 secrets/
+secrets/**/*.bak
+*.env.backup
