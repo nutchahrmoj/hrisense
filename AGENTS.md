@@ -31,6 +31,19 @@ Query `v_*` views instead of base tables so mock and real Supabase paths match. 
 
 Vitest uses `jsdom`, `tests/setup.ts`, and files matching `tests/**/*.test.{ts,tsx}`. Playwright specs live in `tests/e2e/` and default to Chromium. Before finishing, run relevant tests plus `npx tsc --noEmit`; run `npm run build` for route, middleware, or config changes.
 
+## Skills & AI Agent Conventions
+
+This repo has several skill collections installed. Invoke the relevant skill **before** acting on a task if there is even a **1%** chance it applies — this is a hard rule, not a suggestion.
+
+| Collection | Role | Commonly used skills in this project |
+|---|---|---|
+| **superpowers** | Process discipline (rigid — follow exactly) | `brainstorming`, `writing-plans`, `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `executing-plans`, `using-git-worktrees`, `requesting-code-review` |
+| **mattpocock** | Thinking/planning tools (TS/frontend) | `tdd`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `prototype`, `resolving-merge-conflicts`, `grilling` |
+| **supabase** | Any Supabase work (DB, Auth, RLS, CLI, MCP) | `supabase:supabase` |
+| **frontend-design** | Build/adjust UI | `frontend-design` |
+
+Current stack = `superpowers` + `mattpocock` (complementary: process ↔ thinking-tools). For the full comparison of all 5 collections (karpathy / superpowers / mattpocock / addyosmani / ecc) — layer model, pairwise overlaps, and stacking guidance — see [`docs/skill-collections-comparison.md`](docs/skill-collections-comparison.md).
+
 ## Commit & Pull Request Guidelines
 
 Recent commits use Conventional Commit style, for example `fix(auth): ...` and `chore(secrets): ...`. Keep commits scoped and descriptive. PRs should explain the change, mention affected routes or migrations, link issues when relevant, include screenshots for UI changes, and call out required environment or Supabase migration steps.

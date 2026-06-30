@@ -59,15 +59,18 @@
 
 ## 🛠️ 5. Skills ที่เกี่ยวข้อง (ใช้เมื่อ task ตรง)
 
-- **`supabase:supabase`** — งาน Supabase ทุกชนิด (DB, Auth, RLS, CLI, MCP)
-- **`superpowers:brainstorming`** — ก่อนสร้าง feature / เปลี่ยน behavior
-- **`superpowers:writing-plans`** — แปลง spec เป็น implementation plan
-- **`superpowers:systematic-debugging`** — เจอ bug/test fail ก่อนหาสาเหตุ
-- **`superpowers:test-driven-development`** — เขียน feature/bugfix
-- **`superpowers:verification-before-completion`** — ก่อนบอกว่างานเสร็จ
-- **`frontend-design`** — สร้าง/ปรับ UI
+> 🔒 **กฎเหล็ก:** ถ้ามีโอกาสแม้ **1%** ว่า skill ไหนเกี่ยวข้อง ต้อง **invoke ก่อนทำ** — กฎนี้ครอบทุก collection ไม่ใช่แค่ superpowers
 
-> กฎ superpowers: ถ้ามีโอกาสแม้ 1% ว่า skill ไหนเกี่ยวข้อง ต้อง invoke ก่อนทำ
+### Skills ที่ติดตั้งใน HRiSENSE
+
+| Collection | หน้าที่ | Skills ที่ใช้บ่อยในโปรเจค |
+|---|---|---|
+| **superpowers** | วินัยกระบวนการ (rigid = ทำตามเป๊ะ) | `brainstorming`, `writing-plans`, `systematic-debugging`, `test-driven-development`, `verification-before-completion`, `executing-plans`, `using-git-worktrees`, `requesting-code-review` |
+| **mattpocock** | เครื่องมือคิด/วางแผน (TS/frontend) | `tdd`, `diagnosing-bugs`, `codebase-design`, `domain-modeling`, `prototype`, `resolving-merge-conflicts`, `grilling` |
+| **supabase** | งาน Supabase ทุกชนิด (DB, Auth, RLS, CLI, MCP) | `supabase:supabase` |
+| **frontend-design** | สร้าง/ปรับ UI | `frontend-design` |
+
+> 📊 **Stack ปัจจุบัน** = `superpowers` + `mattpocock` (เสริมกัน: process ↔ thinking-tools, เหมาะกับ TS/frontend หนัก) — ดูเปรียบเทียบครบทั้ง 5 collections (karpathy/superpowers/mattpocock/addyosmani/ecc), layer model, ความทับซ้อน, คำแนะนำการ stack ได้ที่ [`docs/skill-collections-comparison.md`](docs/skill-collections-comparison.md)
 
 ---
 
