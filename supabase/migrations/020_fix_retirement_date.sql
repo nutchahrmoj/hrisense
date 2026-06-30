@@ -1,30 +1,19 @@
 -- ============================================================================
--- Migration 020: Fix retirement_date to September 30  —  DEFERRED (no-op)
+-- Migration 020: Fix retirement_date to September 30 — deferred no-op
 -- ============================================================================
--- ORIGINAL INTENT
---   Change the generated column retirement_date from (birth_date + 60 years)
---   to make_date(EXTRACT(YEAR FROM birth_date)+60, 9, 30) — i.e. Sep 30 of
---   the retirement year (per Thai civil-service rules).
 --
--- WHY THIS IS A NO-OP NOW
---   The original body did `ALTER TABLE personnel DROP COLUMN retirement_date`
---   then re-added it as a generated column. But migrations 013 & 016 create
---   VIEWS that reference retirement_date (v_personnel_overview,
---   v_retirement_timeline, v_high_risk_personnel). DROP COLUMN (RESTRICT)
---   fails on the dependency — so applying this migration in sequence after
---   013/016 breaks CI and any fresh environment.
+-- Original intent:
+--   Change personnel.retirement_date to September 30 of the retirement year.
 --
---   The function replacements in the original body were also low-value:
---     - calculate_personnel_risk_score -> a DEGRADED partial version (only
---       retirement risk); the full version from migration 010 is kept.
---     - get_retirement_forecast -> unused by the app (it uses the
---       v_retirement_timeline view + the forecast_retirements RPC instead).
+-- Why this is currently a no-op:
+--   The original migration dropped and recreated personnel.retirement_date
+--   after migrations 013/016 had already created views depending on that
+--   column. A fresh `supabase db reset` therefore fails on view dependencies.
 --
--- CURRENT STATE
---   retirement_date remains generated as (birth_date + 60 years) — functional
---   for the demo. The Sep-30 refinement should be delivered by a future
---   migration that drops/recreates the dependent views around the column
---   change. Tracked as a follow-up.
+-- Follow-up:
+--   Reintroduce this change in a future migration that drops/recreates the
+--   dependent views around the generated-column change. Until then, keep the
+--   functional existing formula from earlier migrations.
 -- ============================================================================
 
--- Intentionally empty (no-op). See note above.
+-- Intentionally empty.

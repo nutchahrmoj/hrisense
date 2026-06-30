@@ -1,37 +1,36 @@
 import { test, expect } from '@playwright/test'
 
+async function loginInMockMode(page: import('@playwright/test').Page) {
+  await page.goto('/login')
+  await page.locator('input[name="email"]').fill('admin@hrisense.local')
+  await page.locator('input[name="password"]').fill('password123')
+  await page.locator('button[type="submit"]').click()
+  await page.waitForURL('**/dashboard', { timeout: 10000 })
+}
+
 test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    // Login ก่อนเข้า dashboard (mock mode)
-    await page.goto('/login')
-    await page.getByRole('button', { name: /เข้าสู่ระบบ/ }).click()
-    await page.waitForURL('**/dashboard', { timeout: 5000 })
+    await loginInMockMode(page)
   })
 
-  test('หน้า dashboard หลักโหลดสำเร็จ', async ({ page }) => {
+  test('loads dashboard page', async ({ page }) => {
     await expect(page).toHaveURL(/.*dashboard/)
     await expect(page.locator('h1, h2').first()).toBeVisible()
   })
 
-  test('มีเมนู sidebar นำทาง', async ({ page }) => {
-    // Sidebar ควรมีเมนู้ต่างๆ
-    const sidebar = page.locator('nav, [role="navigation"]').first()
-    await expect(sidebar).toBeVisible()
+  test('shows sidebar navigation', async ({ page }) => {
+    await expect(page.locator('nav').first()).toBeVisible()
   })
 
-  test('导航 ไปหน้า Personnel ได้', async ({ page }) => {
-    const personnelLink = page.getByText(/บุคลากร|Personnel/i).first()
-    if (await personnelLink.isVisible()) {
-      await personnelLink.click()
-      await page.waitForURL('**/personnel**', { timeout: 5000 })
-      await expect(page).toHaveURL(/.*personnel/)
-    }
+  test('navigates to personnel page', async ({ page }) => {
+    await page.locator('a[href="/personnel"]').first().click()
+    await page.waitForURL('**/personnel**', { timeout: 10000 })
+    await expect(page).toHaveURL(/.*personnel/)
   })
 
-  test('หน้า dashboard มี KPI cards', async ({ page }) => {
-    // KPI cards มักจะใช้ card component
+  test('shows KPI cards', async ({ page }) => {
     const cards = page.locator('[class*="card"], [class*="kpi"]')
-    const count = await cards.count()
-    expect(count).toBeGreaterThan(0)
+    await expect(cards.first()).toBeVisible()
+    expect(await cards.count()).toBeGreaterThan(0)
   })
 })

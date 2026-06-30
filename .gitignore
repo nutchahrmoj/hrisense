@@ -5,4 +5,18 @@ node_modules
 *.tsbuildinfo
 next-env.d.ts
 .claude/
+supabase/.temp/
+playwright-report/
+test-results/
+
+# Local credential store (Supabase keys, OAuth tokens, rotation backups).
+# Never tracked — see docs/superpowers/specs/2026-06-30-secrets-rotation-design.md
 secrets/
+secrets/**/*.bak
+*.env.backup
+
+# Reserved Windows device names (e.g. accidental "TASKKILL /F F:/" → nul file)
+nul
+
+
+.vercel

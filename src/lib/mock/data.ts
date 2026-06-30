@@ -1,3 +1,5 @@
+import { getRiskLevel, type RiskLevel } from '@/lib/utils/risk-colors'
+
 // Mock data for local testing
 // Shapes mirror the views defined in supabase/migrations/013_views.sql & 016_additional_views.sql.
 // Derived mocks (org dashboard, risk distribution, etc.) compute from mockPersonnel/mockVacancyAnalysis
@@ -188,12 +190,7 @@ const salaryByLevel: Record<string, [number, number]> = {
 const eduLevels = ['bachelors', 'bachelors', 'bachelors', 'masters', 'masters', 'doctorate'] as const
 const eduDegree: Record<string, string> = { bachelors: 'ศิลปศาสตรบัณฑิต', masters: 'วิทยาศาสตรมหาบัณฑิต', doctorate: 'ปรัชญาดุษฎีบัณฑิต' }
 
-function riskLevelFromScore(score: number): 'green' | 'amber' | 'red' | 'critical' {
-  if (score > 80) return 'critical'   // 81-100 = วิกฤต
-  if (score > 70) return 'red'         // 71-80 = เสี่ยงสูง
-  if (score > 50) return 'amber'       // 51-70 = เฝ้าระวัง
-  return 'green'                        // ≤50 = ปกติ
-}
+const riskLevelFromScore = (score: number): RiskLevel => getRiskLevel(score)
 
 // ---------------------------------------------------------------------------
 // Burnout risk — computed from behavioral/performance inputs, NOT random.

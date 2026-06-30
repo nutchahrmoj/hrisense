@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils/cn'
 
 export const dynamic = 'force-dynamic'
 
+type Row = Record<string, any>
+
 export default async function VacancyPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -22,10 +24,10 @@ export default async function VacancyPage() {
     supabase.from('v_recruitment_pipeline').select('*').limit(10),
   ])
 
-  const positions = vacancyData.data || []
-  const orgSummary = orgVacancy.data || []
-  const critical = criticalVacancies.data || []
-  const recruitment = recruitmentData.data || []
+  const positions = (vacancyData.data || []) as Row[]
+  const orgSummary = (orgVacancy.data || []) as Row[]
+  const critical = (criticalVacancies.data || []) as Row[]
+  const recruitment = (recruitmentData.data || []) as Row[]
 
   // Statistics
   const totalQuota = positions.reduce((s:number,v:any)=>s+(v.quota||0),0) || 0

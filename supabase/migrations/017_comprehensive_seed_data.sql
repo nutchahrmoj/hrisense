@@ -255,8 +255,8 @@ BEGIN
     -- Overall risk score (weighted average)
     v_risk_score := (v_retirement_risk * 0.4 + v_transfer_risk * 0.3 + v_talent_risk * 0.3);
 
-    -- Risk level: use 'red' for highest ('critical' enum value is not added
-    -- until migration 024, which runs AFTER this seed in numeric order)
+    -- Risk level: use 'red' for highest. The 'critical' enum value is added
+    -- later by migration 024, so this seed cannot use it yet.
     IF v_risk_score > 80 THEN
       v_risk_level := 'red';
     ELSIF v_risk_score > 60 THEN

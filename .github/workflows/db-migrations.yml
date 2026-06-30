@@ -41,11 +41,9 @@ jobs:
           done
 
       - name: Run migrations
-        # db reset (not db push): `db push` targets a *linked remote* project
-        # and needs `supabase link`, which CI does not have (-> "Cannot find
-        # project ref"). `db reset` drops and re-applies all migrations + seed
-        # to the local stack started above — the real "migrations apply cleanly
-        # from scratch" check. Requires seed.sql to be valid (it is a no-op).
+        # db reset, not db push: db push targets a linked remote project and
+        # needs supabase link. CI starts a local stack, so reset is the real
+        # "apply all migrations from scratch" check.
         run: supabase db reset
 
       - name: Verify migrations

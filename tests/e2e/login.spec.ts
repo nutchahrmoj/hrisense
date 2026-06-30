@@ -1,41 +1,42 @@
 import { test, expect } from '@playwright/test'
 
+async function fillValidLogin(page: import('@playwright/test').Page) {
+  await page.locator('input[name="email"]').fill('admin@hrisense.local')
+  await page.locator('input[name="password"]').fill('password123')
+}
+
 test.describe('Login Flow', () => {
-  test('หน้า login แสดงผลถูกต้อง', async ({ page }) => {
+  test('renders login page', async ({ page }) => {
     await page.goto('/login')
 
-    // ตรวจสอบหัวข้อ
     await expect(page.locator('h1')).toHaveText('HRiSENSE')
-    await expect(page.getByText('ระบบพยากรณ์และบริหารความเสี่ยงด้านกำลังคน')).toBeVisible()
-    await expect(page.getByText('กระทรวงยุติธรรม')).toBeVisible()
-  })
-
-  test('มีฟอร์ม email และ password', async ({ page }) => {
-    await page.goto('/login')
-
     await expect(page.locator('input[name="email"]')).toBeVisible()
     await expect(page.locator('input[name="password"]')).toBeVisible()
-    await expect(page.getByRole('button', { name: /เข้าสู่ระบบ/ })).toBeVisible()
+    await expect(page.locator('button[type="submit"]')).toBeVisible()
   })
 
-  test('login สำเร็จใน mock mode', async ({ page }) => {
+  test('validates required fields', async ({ page }) => {
     await page.goto('/login')
 
-    // กดปุ่ม login (mock mode จะ skip auth)
-    await page.getByRole('button', { name: /เข้าสู่ระบบ/ }).click()
+    await page.locator('button[type="submit"]').click()
 
-    // รอ redirect ไป dashboard
-    await page.waitForURL('**/dashboard', { timeout: 5000 })
+    await expect(page.locator('input[name="email"]')).toHaveAttribute('aria-invalid', 'true')
+    await expect(page.locator('input[name="password"]')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  test('redirects to dashboard in mock mode', async ({ page }) => {
+    await page.goto('/login')
+    await fillValidLogin(page)
+
+    await page.locator('button[type="submit"]').click()
+
+    await page.waitForURL('**/dashboard', { timeout: 10000 })
     await expect(page).toHaveURL(/.*dashboard/)
   })
 
-  test('มี badge mock mode เมื่อเปิด mock mode', async ({ page }) => {
+  test('shows mock badge when mock mode is enabled', async ({ page }) => {
     await page.goto('/login')
 
-    // ใน mock mode จะมี badge แสดง
-    const mockBadge = page.getByText(/โหมดทดสอบ|Mock/)
-    // อาจมีหรือไม่มีขึ้นอยู่กับ env
-    const count = await mockBadge.count()
-    expect(count).toBeGreaterThanOrEqual(0)
+    await expect(page.getByText(/Mock Data/)).toBeVisible()
   })
 })

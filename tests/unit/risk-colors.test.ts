@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   getRiskLevel,
+  getRiskTextColor,
   riskColorMap,
   riskDotMap,
   riskLabelTh,
@@ -162,6 +163,24 @@ describe('Risk Colors Utility', () => {
       Object.values(riskChartColors).forEach((color) => {
         expect(color).toMatch(/^#[0-9a-f]{6}$/i)
       })
+    })
+  })
+
+  describe('getRiskTextColor', () => {
+    it('คืนค่า text-green-600 สำหรับคะแนน 30', () => {
+      expect(getRiskTextColor(30)).toBe('text-green-600')
+    })
+
+    it('คืนค่า text-amber-600 สำหรับคะแนน 60', () => {
+      expect(getRiskTextColor(60)).toBe('text-amber-600')
+    })
+
+    it('คืนค่า text-red-600 สำหรับคะแนน 75', () => {
+      expect(getRiskTextColor(75)).toBe('text-red-600')
+    })
+
+    it('คืนค่า text-destructive สำหรับคะแนน 90', () => {
+      expect(getRiskTextColor(90)).toBe('text-destructive')
     })
   })
 })

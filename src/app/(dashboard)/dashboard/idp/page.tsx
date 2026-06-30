@@ -12,6 +12,8 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
+type Row = Record<string, any>
+
 export default async function IDPPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -21,9 +23,9 @@ export default async function IDPPage() {
     supabase.from('v_high_potential_personnel').select('*').limit(20),
   ])
 
-  const plans = idpPlans.data || []
-  const trainings = trainingRecords.data || []
-  const hiPos = highPotentials.data || []
+  const plans = (idpPlans.data || []) as Row[]
+  const trainings = (trainingRecords.data || []) as Row[]
+  const hiPos = (highPotentials.data || []) as Row[]
 
   // Statistics
   const totalPlans = plans.length

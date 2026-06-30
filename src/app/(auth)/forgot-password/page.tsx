@@ -4,7 +4,7 @@ import { Shield, ArrowLeft, Loader2, Mail } from 'lucide-react'
 import { forgotPasswordSchema, type ForgotPasswordInput } from '@/lib/validations/auth'
 
 export default function ForgotPasswordPage() {
-  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
+  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production'
 
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -36,13 +36,18 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const response = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
       })
 
-      if (resetError) {
+      if (!response.ok) {
+        if (response.status === 429) {
+          setError('พยายามหลายครั้งเกินไป กรุณารอแล้วลองใหม่')
+          setLoading(false)
+          return
+        }
         setError('ไม่สามารถส่งอีเมลรีเซ็ตรหัสผ่านได้ กรุณาลองใหม่')
         setLoading(false)
         return

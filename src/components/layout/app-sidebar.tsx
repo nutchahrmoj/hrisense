@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, AlertTriangle, BarChart3,
-  Users, Bell, Settings, Shield, Target, BookOpen, Building2
+  Users, Bell, Settings, Shield, Target, BookOpen, Building2, X
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -20,13 +20,22 @@ const navItems = [
   { href: '/settings', label: 'ตั้งค่า', icon: Settings },
 ]
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  open?: boolean
+  onClose?: () => void
+}
+
+export function AppSidebar({ open, onClose }: AppSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-64 bg-card border-r flex flex-col shrink-0">
+    <aside className={cn(
+      "w-64 bg-card border-r flex flex-col shrink-0 z-50 transition-transform duration-200",
+      "fixed inset-y-0 left-0 lg:static lg:translate-x-0",
+      open ? "translate-x-0" : "-translate-x-full"
+    )}>
       {/* Logo */}
-      <div className="p-4 border-b">
+      <div className="p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
             <Shield className="w-5 h-5 text-primary" />
@@ -36,6 +45,14 @@ export function AppSidebar() {
             <p className="text-xs text-muted-foreground">สำนักงานปลัดกระทรวงยุติธรรม</p>
           </div>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="lg:hidden p-1.5 rounded-lg hover:bg-muted text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="ปิดเมนูนำทาง"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -46,6 +63,7 @@ export function AppSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors',
                 isActive
