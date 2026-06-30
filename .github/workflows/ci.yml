@@ -97,7 +97,10 @@ jobs:
           done
 
       - name: Run migrations
-        run: supabase db push
+        # db reset, not db push: db push targets a linked remote project and
+        # needs supabase link. CI starts a local stack, so reset is the real
+        # "apply all migrations from scratch" check.
+        run: supabase db reset
 
       - name: Verify migrations
         run: |
@@ -123,7 +126,10 @@ jobs:
       - run: npm run test:e2e
         env:
           NEXT_PUBLIC_USE_MOCK: 'true'
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: mock-key
           PLAYWRIGHT_BASE_URL: http://localhost:3000
+          PLAYWRIGHT_WEB_SERVER_COMMAND: npm run dev
       - uses: actions/upload-artifact@v4
         if: always()
         with:

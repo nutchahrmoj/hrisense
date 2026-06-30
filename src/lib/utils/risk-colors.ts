@@ -34,3 +34,14 @@ export const riskChartColors = {
   red: '#ef4444',
   critical: '#991b1b',
 } as const
+
+export const riskTextColorMap: Record<RiskLevel, string> = {
+  green: 'text-green-600',
+  amber: 'text-amber-600',
+  red: 'text-red-600',
+  critical: 'text-destructive',
+}
+
+export function getRiskTextColor(score: number): string {
+  return riskTextColorMap[getRiskLevel(score)]
+}

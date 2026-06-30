@@ -6,7 +6,7 @@ import { loginSchema, type LoginInput } from '@/lib/validations/auth'
 
 export default function LoginPage() {
   const router = useRouter()
-  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
+  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production'
 
   const [form, setForm] = useState<LoginInput>({ email: '', password: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof LoginInput, string>>>({})
@@ -40,7 +40,7 @@ export default function LoginPage() {
     setLoading(true)
 
     if (isMock) {
-      setTimeout(() => router.push('/dashboard'), 500)
+      router.push('/dashboard')
       return
     }
 

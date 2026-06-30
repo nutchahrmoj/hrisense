@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { FilterBar } from '@/components/filters/filter-bar'
 import { RetirementTrendChart } from '@/components/charts/retirement-trend-chart'
-import { getRiskLevel } from '@/lib/utils/risk-colors'
+import { getRiskLevel, getRiskTextColor } from '@/lib/utils/risk-colors'
 import Link from 'next/link'
 import {
   Users, TrendingDown, CalendarClock, AlertTriangle,
@@ -49,23 +49,23 @@ export default async function DashboardPage({
   // org is selected, so the unfiltered (no-param) case returns everything.
   const orgQuery = supabase.from('v_org_dashboard').select('*')
 
-  const retirementQuery = supabase.from('v_retirement_timeline').select('*')
-  if (orgFilter) retirementQuery.eq('organization_id', orgFilter)
-  retirementQuery.limit(500)
+  let retirementQuery = supabase.from('v_retirement_timeline').select('*')
+  if (orgFilter) retirementQuery = retirementQuery.eq('organization_id', orgFilter)
+  retirementQuery = retirementQuery.limit(500)
 
-  const highRiskQuery = supabase.from('v_high_risk_personnel').select('*')
-  if (orgFilter) highRiskQuery.eq('organization_id', orgFilter)
-  highRiskQuery.limit(20)
+  let highRiskQuery = supabase.from('v_high_risk_personnel').select('*')
+  if (orgFilter) highRiskQuery = highRiskQuery.eq('organization_id', orgFilter)
+  highRiskQuery = highRiskQuery.limit(20)
 
-  const alertQuery = supabase.from('v_active_alerts').select('*')
-  if (orgFilter) alertQuery.eq('organization_id', orgFilter)
-  alertQuery.limit(15)
+  let alertQuery = supabase.from('v_active_alerts').select('*')
+  if (orgFilter) alertQuery = alertQuery.eq('organization_id', orgFilter)
+  alertQuery = alertQuery.limit(15)
 
   // All personnel (scoped by org filter) — the source for the true org-wide
   // risk-level distribution. v_high_risk_personnel excludes low-risk staff by
   // definition, so it can never show an honest "ปกติ" count.
-  const personnelQuery = supabase.from('v_personnel_overview').select('id,risk_level,overall_risk_score,organization_id')
-  if (orgFilter) personnelQuery.eq('organization_id', orgFilter)
+  let personnelQuery = supabase.from('v_personnel_overview').select('id,risk_level,overall_risk_score,organization_id')
+  if (orgFilter) personnelQuery = personnelQuery.eq('organization_id', orgFilter)
 
   const [orgData, retirementData, highRiskData, alertData, personnelData] = await Promise.all([
     orgQuery,
@@ -75,8 +75,17 @@ export default async function DashboardPage({
     personnelQuery,
   ])
 
+  const queryErrors = [
+    orgData.error,
+    retirementData.error,
+    highRiskData.error,
+    alertData.error,
+    personnelData.error,
+  ].filter(Boolean)
+
   // Surface a real error state instead of silently rendering zeros.
-  if (orgData.error) {
+  if (queryErrors.length > 0) {
+    console.error('[dashboard] query errors:', queryErrors)
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-foreground">แดชบอร์ดหลัก</h1>
@@ -390,11 +399,7 @@ export default async function DashboardPage({
                       <td className="py-3 px-4 text-muted-foreground">{p.organization_name}</td>
                       <td className="py-3 px-4 text-muted-foreground">{p.position_name || '—'}</td>
                       <td className="py-3 px-4">
-                        <span className={`font-bold tabular-nums ${
-                          p.overall_risk_score > 80 ? 'text-red-600' :
-                          p.overall_risk_score > 60 ? 'text-red-500' :
-                          p.overall_risk_score > 40 ? 'text-amber-600' : 'text-green-600'
-                        }`}>
+                        <span className={`font-bold tabular-nums ${getRiskTextColor(p.overall_risk_score ?? 0)}`}>
                           {p.overall_risk_score?.toFixed(0) || '—'}
                         </span>
                       </td>

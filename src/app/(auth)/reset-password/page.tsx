@@ -6,7 +6,7 @@ import { resetPasswordSchema, type ResetPasswordInput } from '@/lib/validations/
 
 export default function ResetPasswordPage() {
   const router = useRouter()
-  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
+  const isMock = process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production'
 
   const [form, setForm] = useState<ResetPasswordInput>({ password: '', confirmPassword: '' })
   const [errors, setErrors] = useState<Partial<Record<keyof ResetPasswordInput, string>>>({})

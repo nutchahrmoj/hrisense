@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
-export function AppHeader() {
+interface AppHeaderProps {
+  onMenuClick?: () => void
+}
+
+export function AppHeader({ onMenuClick }: AppHeaderProps) {
   const [alertCount, setAlertCount] = useState(0)
   const [userName, setUserName] = useState('ผู้ดูแลระบบ')
   const router = useRouter()
@@ -35,6 +39,7 @@ export function AppHeader() {
       <div className="flex items-center gap-2">
         <button
           type="button"
+          onClick={onMenuClick}
           className="lg:hidden p-2 rounded-lg hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="เปิดเมนูนำทาง"
         >

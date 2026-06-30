@@ -12,6 +12,8 @@ import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
+type Row = Record<string, any>
+
 export default async function SuccessionPage() {
   const supabase = await createServerSupabaseClient()
 
@@ -23,9 +25,9 @@ export default async function SuccessionPage() {
       .order('retirement_date'),
   ])
 
-  const positions = criticalPositions.data || []
-  const allCandidates = candidates.data || []
-  const retiringCritical = retirementTimeline.data || []
+  const positions = (criticalPositions.data || []) as Row[]
+  const allCandidates = (candidates.data || []) as Row[]
+  const retiringCritical = (retirementTimeline.data || []) as Row[]
 
   // Statistics
   const totalCritical = positions.length

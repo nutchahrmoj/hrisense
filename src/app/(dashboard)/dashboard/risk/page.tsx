@@ -11,10 +11,12 @@ import {
   ChevronRight, BarChart3, PieChart, LineChart
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { getRiskLevel } from '@/lib/utils/risk-colors'
+import { getRiskLevel, getRiskTextColor } from '@/lib/utils/risk-colors'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+
+type Row = Record<string, any>
 
 export default async function RiskPage() {
   const supabase = await createServerSupabaseClient()
@@ -26,10 +28,10 @@ export default async function RiskPage() {
     supabase.from('v_org_risk_details').select('*').limit(20),
   ])
 
-  const orgs = orgData.data || []
-  const highRiskPersonnel = highRiskData.data || []
-  const riskDist = riskDistribution.data || []
-  const orgDetails = orgRiskDetails.data || []
+  const orgs = (orgData.data || []) as Row[]
+  const highRiskPersonnel = (highRiskData.data || []) as Row[]
+  const riskDist = (riskDistribution.data || []) as Row[]
+  const orgDetails = (orgRiskDetails.data || []) as Row[]
 
   // Statistics
   const avgScore = orgs.length > 0 ? orgs.reduce((s:number,o:any)=>s+(o.overall_risk_score||0),0)/orgs.length : 0
@@ -264,10 +266,7 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-right">
                       <span className={cn(
                         'font-bold font-mono',
-                        getRiskLevel(p.overall_risk_score ?? 0) === 'critical' && 'text-destructive',
-                        getRiskLevel(p.overall_risk_score ?? 0) === 'red' && 'text-red-600',
-                        getRiskLevel(p.overall_risk_score ?? 0) === 'amber' && 'text-amber-600',
-                        getRiskLevel(p.overall_risk_score ?? 0) === 'green' && 'text-green-600'
+                        getRiskTextColor(p.overall_risk_score ?? 0)
                       )}>
                         {p.overall_risk_score?.toFixed(0)}
                       </span>
@@ -360,10 +359,7 @@ export default async function RiskPage() {
                     <td className="py-3 px-4 text-center">
                       <span className={cn(
                         'font-bold font-mono',
-                        getRiskLevel(o.overall_risk_score ?? 0) === 'critical' && 'text-destructive',
-                        getRiskLevel(o.overall_risk_score ?? 0) === 'red' && 'text-red-600',
-                        getRiskLevel(o.overall_risk_score ?? 0) === 'amber' && 'text-amber-600',
-                        getRiskLevel(o.overall_risk_score ?? 0) === 'green' && 'text-green-600'
+                        getRiskTextColor(o.overall_risk_score ?? 0)
                       )}>
                         {o.overall_risk_score?.toFixed(0) || '—'}
                       </span>
@@ -405,10 +401,10 @@ export default async function RiskPage() {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { level: 'วิกฤต', score: '75-100', color: 'bg-destructive', description: 'ต้องดูแลเร่งด่วนภายใน 30 วัน' },
-              { level: 'เสี่ยงสูง', score: '50-74', color: 'bg-red-500', description: 'ต้องติดตามและแก้ไขภายใน 90 วัน' },
-              { level: 'เฝ้าระวัง', score: '25-49', color: 'bg-amber-500', description: 'ควรติดตามเป็นระยะ' },
-              { level: 'ปกติ', score: '0-24', color: 'bg-green-500', description: 'ไม่มีความเสี่ยงสำคัญ' },
+              { level: 'วิกฤต', score: '81-100', color: 'bg-destructive', description: 'ต้องดูแลเร่งด่วนภายใน 30 วัน' },
+              { level: 'เสี่ยงสูง', score: '71-80', color: 'bg-red-500', description: 'ต้องติดตามและแก้ไขภายใน 90 วัน' },
+              { level: 'เฝ้าระวัง', score: '51-70', color: 'bg-amber-500', description: 'ควรติดตามเป็นระยะ' },
+              { level: 'ปกติ', score: '0-50', color: 'bg-green-500', description: 'ไม่มีความเสี่ยงสำคัญ' },
             ].map((item, idx) => (
               <div key={idx} className="p-4 rounded-lg border bg-card">
                 <div className="flex items-center gap-2 mb-2">

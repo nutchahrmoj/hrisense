@@ -9,8 +9,8 @@ import { getSupabaseConfig } from '@/lib/security/supabase-config'
  * Use this for all server-side data fetching (server components, API routes).
  */
 export async function createServerSupabaseClient() {
-  if (process.env.USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
-    return createMockServerClient() as any
+  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
+    return createMockServerClient()
   }
 
   const config = getSupabaseConfig()

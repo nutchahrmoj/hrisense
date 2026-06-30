@@ -17,11 +17,39 @@ class MockQueryBuilder {
   private singleMode = false
 
   constructor(table: string) { this.table = table }
+
+  private clone(): MockQueryBuilder {
+    const next = new MockQueryBuilder(this.table)
+    next.filters = { ...this.filters }
+    next.orderByField = this.orderByField
+    next.orderByAsc = this.orderByAsc
+    next.limitCount = this.limitCount
+    next.singleMode = this.singleMode
+    return next
+  }
+
   select(fields: string = '*') { return this }
-  eq(field: string, value: any) { this.filters[field] = value; return this }
-  order(field: string, opts?: { ascending?: boolean }) { this.orderByField = field; this.orderByAsc = opts?.ascending ?? true; return this }
-  limit(count: number) { this.limitCount = count; return this }
-  single() { this.singleMode = true; return this }
+  eq(field: string, value: any) {
+    const next = this.clone()
+    next.filters[field] = value
+    return next
+  }
+  order(field: string, opts?: { ascending?: boolean }) {
+    const next = this.clone()
+    next.orderByField = field
+    next.orderByAsc = opts?.ascending ?? true
+    return next
+  }
+  limit(count: number) {
+    const next = this.clone()
+    next.limitCount = count
+    return next
+  }
+  single() {
+    const next = this.clone()
+    next.singleMode = true
+    return next
+  }
 
   async then(resolve: (value: any) => void) {
     let result = this.getData()
@@ -80,6 +108,7 @@ class MockSupabaseClient {
     async signInWithPassword({ email }: { email: string; password: string }) { return { data: { user: { id: 'user-1', email } }, error: null } },
     async signOut() { return { error: null } },
     async exchangeCodeForSession() { return { error: null } },
+    async updateUser() { return { data: { user: { id: 'user-1', email: 'admin@moj.go.th' } }, error: null } },
   }
   channel() { return { on: () => ({ subscribe: () => ({}) }), subscribe: () => ({}) } }
   removeChannel() {}

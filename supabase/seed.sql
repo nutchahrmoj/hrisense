@@ -2,7 +2,12 @@
 -- HRiSENSE Seed Data Entry Point
 -- ============================================================================
 -- This file is called by `supabase db reset` after all migrations are applied.
--- It sources the main seed migration (017).
+--
+-- Seeding is handled by migrations:
+--   - 017_comprehensive_seed_data.sql
+--   - 026_seed_burnout_data.sql
+--
+-- This file is intentionally a no-op. Do not use psql meta-commands such as
+-- \ir here: the Supabase CLI seed runner sends this file as SQL, not through
+-- psql, so meta-commands fail CI with a syntax error.
 -- ============================================================================
-
-\ir migrations/017_comprehensive_seed_data.sql

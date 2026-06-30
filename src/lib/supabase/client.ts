@@ -4,8 +4,8 @@ import { createMockClient } from '@/lib/mock/client'
 import { getSupabaseConfig } from '@/lib/security/supabase-config'
 
 export function createClient() {
-  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
-    return createMockClient() as any
+  if (process.env.NEXT_PUBLIC_USE_MOCK === 'true' && process.env.NODE_ENV !== 'production') {
+    return createMockClient()
   }
 
   const config = getSupabaseConfig()
