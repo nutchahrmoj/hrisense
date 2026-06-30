@@ -11,3 +11,7 @@ next-env.d.ts
 secrets/
 secrets/**/*.bak
 *.env.backup
+
+# Reserved Windows device names (e.g. accidental "TASKKILL /F F:/" → nul file)
+nul
+
