@@ -2,7 +2,19 @@
 -- HRiSENSE Seed Data Entry Point
 -- ============================================================================
 -- This file is called by `supabase db reset` after all migrations are applied.
--- It sources the main seed migration (017).
+--
+-- Seeding is handled by the migrations themselves:
+--   - 017_comprehensive_seed_data.sql  (personnel, risk assessments, alerts)
+--   - 026_seed_burnout_data.sql        (burnout factors + risk calc)
+-- Both live in supabase/migrations/, so they run automatically on local
+-- `db reset`, on remote via db push, and in CI — before this file.
+--
+-- This file is intentionally a NO-OP.
+--
+-- Why not `\ir` the seed migration here (the previous approach):
+--   `\ir` is a *psql* meta-command, not standard SQL. The Supabase CLI seed
+--   runner sends seed.sql as a batch SQL payload (not through psql), so the
+--   `\` raised  ERROR: syntax error at or near "\" (SQLSTATE 42601)  and
+--   failed the "Migration Diff" + "Test Migrations" CI jobs. Re-sourcing 017
+--   here was also redundant — 017 already runs in the migration step above.
 -- ============================================================================
-
-\ir migrations/017_comprehensive_seed_data.sql
