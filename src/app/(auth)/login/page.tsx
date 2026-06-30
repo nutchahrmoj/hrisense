@@ -1,8 +1,11 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, LockKeyhole, Mail, Shield } from 'lucide-react'
 import { loginSchema, type LoginInput } from '@/lib/validations/auth'
+
+const REMEMBER_LOGIN_KEY = 'hrisense:remember-login'
+const REMEMBERED_EMAIL_KEY = 'hrisense:remembered-email'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,6 +16,17 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
+
+  useEffect(() => {
+    const storedRemember = window.localStorage.getItem(REMEMBER_LOGIN_KEY) === 'true'
+    const storedEmail = window.localStorage.getItem(REMEMBERED_EMAIL_KEY)
+
+    setRememberMe(storedRemember)
+    if (storedRemember && storedEmail) {
+      setForm((prev) => ({ ...prev, email: storedEmail }))
+    }
+  }, [])
 
   function validate(): boolean {
     const result = loginSchema.safeParse(form)
@@ -31,12 +45,24 @@ export default function LoginPage() {
     return true
   }
 
+  function persistRememberPreference() {
+    if (rememberMe) {
+      window.localStorage.setItem(REMEMBER_LOGIN_KEY, 'true')
+      window.localStorage.setItem(REMEMBERED_EMAIL_KEY, form.email)
+      return
+    }
+
+    window.localStorage.removeItem(REMEMBER_LOGIN_KEY)
+    window.localStorage.removeItem(REMEMBERED_EMAIL_KEY)
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setApiError(null)
 
     if (!validate()) return
 
+    persistRememberPreference()
     setLoading(true)
 
     if (isMock) {
@@ -46,7 +72,7 @@ export default function LoginPage() {
 
     try {
       const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
+      const supabase = createClient({ rememberSession: rememberMe })
       const { error } = await supabase.auth.signInWithPassword({
         email: form.email,
         password: form.password,
@@ -147,19 +173,25 @@ export default function LoginPage() {
           <label htmlFor="email" className="text-sm font-medium">
             อีเมล
           </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={form.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            className={`w-full px-3 py-2 rounded-lg border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 ${
-              errors.email ? 'border-destructive' : ''
-            }`}
-            aria-invalid={!!errors.email}
-            aria-describedby={errors.email ? 'email-error' : undefined}
-          />
+          <div className="relative">
+            <Mail
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={form.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              className={`w-full rounded-lg border bg-card py-2 pl-10 pr-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+                errors.email ? 'border-destructive' : ''
+              }`}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? 'email-error' : undefined}
+            />
+          </div>
           {errors.email && (
             <p id="email-error" className="text-sm text-destructive" role="alert">
               {errors.email}
@@ -173,6 +205,10 @@ export default function LoginPage() {
             รหัสผ่าน
           </label>
           <div className="relative">
+            <LockKeyhole
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <input
               id="password"
               name="password"
@@ -180,7 +216,7 @@ export default function LoginPage() {
               autoComplete="current-password"
               value={form.password}
               onChange={(e) => handleChange('password', e.target.value)}
-              className={`w-full px-3 py-2 pr-10 rounded-lg border bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 ${
+              className={`w-full rounded-lg border bg-card py-2 pl-10 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 ${
                 errors.password ? 'border-destructive' : ''
               }`}
               aria-invalid={!!errors.password}
@@ -200,6 +236,20 @@ export default function LoginPage() {
               {errors.password}
             </p>
           )}
+        </div>
+
+        <div className="flex items-center justify-between gap-4">
+          <label htmlFor="remember-me" className="flex items-center gap-2 text-sm text-foreground cursor-pointer select-none">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border-input accent-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
+            />
+            <span>จดจำฉัน</span>
+          </label>
         </div>
 
         {/* Submit */}
@@ -230,6 +280,12 @@ export default function LoginPage() {
           ลืมรหัสผ่าน?
         </a>
       </div>
+
+      {/* Footer */}
+      <footer className="text-center text-[10px] sm:text-xs text-muted-foreground/80 pt-6 border-t border-border/40 space-y-1">
+        <p>Copy Right 2026 Nutcha Anuntavichien</p>
+        <p>กองบริหารทรัพยากรบุคคล สำนักงานปลัดกระทรวงยุติธรรม</p>
+      </footer>
     </div>
   )
 }
