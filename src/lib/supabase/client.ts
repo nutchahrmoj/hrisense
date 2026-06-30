@@ -75,16 +75,21 @@ export function createClient(options: BrowserClientOptions = {}) {
     rememberSession = true
   }
 
+  // @supabase/ssr เก็บ session ใน cookie เสมอ (middleware/server component อ่านจาก
+  // cookie) ดังนั้น persistSession ต้องเป็น true เสมอ — ถ้าตั้ง false ฝั่ง server
+  // จะมองไม่เห็น session แล้ว redirect กลับ /login วนลูป (login ค้าง, เคยเกิดบน prod)
+  //
+  // "จดจำฉัน" ควบคุมด้วย cookie expiry แทน:
+  //   - remember=true  → cookie ปกติ (มี Max-Age → อยู่ข้ามเซสชัน)
+  //   - remember=false → createSessionCookieMethods ลบ Max-Age/Expires ออก
+  //                      → browser ถือเป็น session cookie → หายเมื่อปิด browser
   return createBrowserClient<Database>(config.url, config.anonKey, {
     isSingleton: rememberSession !== false,
     cookies: rememberSession === false
       ? createSessionCookieMethods()
       : undefined,
     auth: {
-      persistSession: rememberSession !== false,
-      storage: rememberSession === false
-        ? (typeof window !== 'undefined' ? window.sessionStorage : undefined)
-        : undefined,
+      persistSession: true,
     },
   })
 }
