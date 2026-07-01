@@ -355,6 +355,92 @@ export default async function DashboardPage({
         </div>
       </section>
 
+      {/* Workforce & Succession Analytics Row */}
+      <section>
+        <h2 className="text-base font-semibold text-foreground mb-3">การวิเคราะห์อัตรากำลังและแผนสืบทอดตำแหน่ง</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Vacancy Analytics Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-primary" />
+                การวิเคราะห์อัตรากำลังรายกอง
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">ตำแหน่งที่ว่างทั้งหมด</span>
+                  <span className="font-semibold text-destructive">{totalVacant.toLocaleString()} / {totalQuota.toLocaleString()} ตำแหน่ง ({vacancyRate}%)</span>
+                </div>
+                <div className="h-3 bg-muted rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-amber-500 rounded-full transition-all duration-500" 
+                    style={{ width: `${vacancyRate}%` }} 
+                  />
+                </div>
+                <div className="pt-2 border-t space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1">หน่วยงานที่มีอัตราว่างสูงสุด:</p>
+                  {orgsAll
+                    .filter((o: any) => o.org_level === 'division' && (o.vacancy_count || 0) > 0)
+                    .sort((a: any, b: any) => (b.vacancy_rate || 0) - (a.vacancy_rate || 0))
+                    .slice(0, 3)
+                    .map((o: any, idx: number) => (
+                      <div key={idx} className="flex justify-between items-center text-xs">
+                        <span className="text-muted-foreground truncate max-w-[250px]">{o.name_th}</span>
+                        <span className="font-bold text-amber-600 shrink-0 ml-2">ว่าง {o.vacancy_count} อัตรา ({o.vacancy_rate?.toFixed(1)}%)</span>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Succession Planning Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                แผนสืบทอดตำแหน่งสำคัญ
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {(() => {
+                const totalCriticalPositions = orgs.reduce((sum: number, o: any) => sum + (o.critical_positions || 0), 0)
+                const totalWithoutSuccessor = orgs.reduce((sum: number, o: any) => sum + (o.positions_without_successor || 0), 0)
+                const coverageRate = totalCriticalPositions > 0
+                  ? ((1 - totalWithoutSuccessor / totalCriticalPositions) * 100).toFixed(1)
+                  : '0'
+                return (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">อัตราครอบคลุมผู้สืบทอด</span>
+                      <span className="font-semibold text-green-600">{coverageRate}%</span>
+                    </div>
+                    <div className="h-3 bg-muted rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-green-500 rounded-full transition-all duration-500" 
+                        style={{ width: `${coverageRate}%` }} 
+                      />
+                    </div>
+                    <div className="pt-2 border-t space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">ตำแหน่งสำคัญทั้งหมด:</span>
+                        <span className="font-bold">{totalCriticalPositions} ตำแหน่ง</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">ตำแหน่งสำคัญที่ยังไม่มีผู้สืบทอด:</span>
+                        <span className="font-bold text-destructive">{totalWithoutSuccessor} ตำแหน่ง</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* High Risk Personnel Table */}
       <section>
         <h2 className="text-base font-semibold text-foreground mb-3">บุคลากรเสี่ยงสูง</h2>

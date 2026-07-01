@@ -11,6 +11,7 @@ export default async function OrganizationsPage() {
   const { data: orgs, error } = await supabase
     .from('v_org_dashboard')
     .select('*')
+    .eq('org_level', 'division')
     .order('name_th')
   if (error) throw error
 
