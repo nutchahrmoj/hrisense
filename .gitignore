@@ -9,6 +9,9 @@ supabase/.temp/
 playwright-report/
 test-results/
 .vercel
+.agents/
+.impeccable/
+.vscode/
 
 # Local credential store (Supabase keys, OAuth tokens, rotation backups).
 # Never track these; see docs/superpowers/specs/2026-06-30-secrets-rotation-design.md
