@@ -1,16 +1,23 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { PersonnelListTable } from '@/components/personnel/personnel-list-table'
+import { mergePersonnelBurnout } from '@/lib/utils/personnel-burnout'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PersonnelPage() {
   const supabase = await createServerSupabaseClient()
-  const { data, error } = await supabase
-    .from('v_personnel_overview')
-    .select('*')
-    .eq('status', 'active')
+  const [{ data, error }, { data: burnoutData }] = await Promise.all([
+    supabase
+      .from('v_personnel_overview')
+      .select('*')
+      .eq('status', 'active'),
+    supabase
+      .from('v_burnout_analysis')
+      .select('personnel_id,burnout_risk,late_days_ytd,absent_days_ytd,performance_score,overtime_hours_ytd,training_hours_ytd,workload_index'),
+  ])
   
   if (error) throw error
+  const personnel = mergePersonnelBurnout(data || [], burnoutData as any[] | null)
 
   return (
     <div className="space-y-6">
@@ -20,7 +27,7 @@ export default async function PersonnelPage() {
           รายชื่อและการวิเคราะห์ระดับความเสี่ยงของกำลังพลรายบุคคล
         </p>
       </div>
-      <PersonnelListTable personnel={data || []} />
+      <PersonnelListTable personnel={personnel} />
     </div>
   )
 }

@@ -3,19 +3,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RiskBadge } from '@/components/personnel/risk-badge'
 import { Users, BarChart3, CalendarClock, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
+import { mergePersonnelBurnout } from '@/lib/utils/personnel-burnout'
 
 export const dynamic = 'force-dynamic'
 
 export default async function OrganizationDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
 
-  const [{ data: org, error: orgError }, { data: personnel, error: personnelError }] = await Promise.all([
+  const [
+    { data: org, error: orgError },
+    { data: personnelData, error: personnelError },
+    { data: burnoutData },
+  ] = await Promise.all([
     supabase.from('v_org_dashboard').select('*').eq('organization_id', params.id).single(),
     supabase.from('v_personnel_overview').select('*').eq('organization_id', params.id).order('full_name_th'),
+    supabase
+      .from('v_burnout_analysis')
+      .select('personnel_id,burnout_risk,late_days_ytd,absent_days_ytd,performance_score,overtime_hours_ytd,training_hours_ytd,workload_index')
+      .eq('organization_id', params.id),
   ])
   // .single() returns an error when no row matches; treat that as "not found", not a thrown error.
   if (orgError && orgError.code !== 'PGRST116') throw orgError
   if (personnelError) throw personnelError
+  const personnel = mergePersonnelBurnout(personnelData || [], burnoutData as any[] | null)
 
   if (!org) {
     return (

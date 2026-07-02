@@ -3,19 +3,29 @@ import { cn } from '@/lib/utils/cn'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RiskBadge } from '@/components/personnel/risk-badge'
 import { ThaiDate } from '@/components/shared/thai-date'
+import { mergePersonnelBurnout } from '@/lib/utils/personnel-burnout'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PersonnelDetailPage({ params }: { params: { id: string } }) {
   const supabase = await createServerSupabaseClient()
-  const { data: person, error } = await supabase
-    .from('v_personnel_overview')
-    .select('*')
-    .eq('id', params.id)
-    .single() as { data: any; error: { code?: string } | null }
+  const [{ data: personData, error }, { data: burnoutData }] = await Promise.all([
+    supabase
+      .from('v_personnel_overview')
+      .select('*')
+      .eq('id', params.id)
+      .single(),
+    supabase
+      .from('v_burnout_analysis')
+      .select('personnel_id,burnout_risk,late_days_ytd,absent_days_ytd,performance_score,overtime_hours_ytd,training_hours_ytd,workload_index')
+      .eq('personnel_id', params.id),
+  ]) as [{ data: any; error: { code?: string } | null }, { data: any[] | null }]
 
   // .single() errors with PGRST116 when no row matches — that's "not found", not a failure.
   if (error && error.code !== 'PGRST116') throw error
+  const person = personData
+    ? mergePersonnelBurnout([personData], burnoutData)[0]
+    : null
   if (!person) return <div className="p-6 text-center text-muted-foreground">ไม่พบข้อมูล</div>
 
   return (

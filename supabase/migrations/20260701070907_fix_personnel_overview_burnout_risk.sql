@@ -1,0 +1,7 @@
+-- Superseded by 034_add_burnout_factors_to_personnel_overview.sql.
+--
+-- This file originally recreated v_personnel_overview with only burnout_risk.
+-- Its timestamped filename sorts after migration 034, so leaving the old DDL
+-- here would remove burnout_factors during local resets. Keep this as a no-op
+-- compatibility marker so migration order remains stable without regressing
+-- the view contract.
